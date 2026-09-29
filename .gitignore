@@ -28,6 +28,11 @@ fastlane/test_output
 # Code Injection
 iOSInjectionProject/
 
+# Build Artifacts
+*.ipa
+*.zip
+Payload/
+
 # macOS / OS
 .DS_Store
 *.swp
