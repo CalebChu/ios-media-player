@@ -40,8 +40,10 @@ public final class PlaybackManager: ObservableObject {
     }
 
     deinit {
-        removePeriodicTimeObserver()
-        stopAccessingActiveSecurityScopedResource()
+        if let token = timeObserverToken {
+            player.removeTimeObserver(token)
+        }
+        activeSecurityScopedURL?.stopAccessingSecurityScopedResource()
     }
 
     public var isPlaying: Bool {

@@ -33,7 +33,7 @@ public final class PlaybackProgressStore: ObservableObject {
         }
 
         do {
-            let decoded = try JSONDecoder().decode([MediaItem].self, data)
+            let decoded = try JSONDecoder().decode([MediaItem].self, from: data)
             self.items = decoded
         } catch {
             print("Failed to decode media items: \(error.localizedDescription)")
