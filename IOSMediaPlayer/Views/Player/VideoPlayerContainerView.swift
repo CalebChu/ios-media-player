@@ -103,7 +103,7 @@ public struct VideoPlayerContainerView: View {
             autoHideTimerTask?.cancel()
             playbackManager.persistCurrentProgress()
         }
-        .onChange(of: playbackManager.playbackState) { newState in
+        .onChange(of: playbackManager.playbackState) { _, newState in
             if newState == .playing {
                 scheduleAutoHideTimer()
             }

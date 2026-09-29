@@ -198,13 +198,13 @@ public struct LibraryView: View {
                 VStack(spacing: 14) {
                     Image(systemName: "film.stack")
                         .font(.system(size: 48))
-                        .foregroundColor(.tertiaryLabel)
+                        .foregroundColor(Color(uiColor: .tertiaryLabel))
                     Text("No Media Yet")
                         .font(.headline)
                         .foregroundColor(.secondary)
                     Text("Tap Import Files or Stream URL above to add videos and audio.")
                         .font(.subheadline)
-                        .foregroundColor(.tertiaryLabel)
+                        .foregroundColor(Color(uiColor: .tertiaryLabel))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }

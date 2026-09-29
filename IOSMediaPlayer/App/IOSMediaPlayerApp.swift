@@ -17,7 +17,7 @@ struct IOSMediaPlayerApp: App {
                 .environmentObject(progressStore)
                 .preferredColorScheme(.dark)
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background, .inactive:
                 playbackManager.persistCurrentProgress()

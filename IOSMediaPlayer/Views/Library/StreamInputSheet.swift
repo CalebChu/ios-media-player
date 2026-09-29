@@ -8,7 +8,7 @@ public struct StreamInputSheet: View {
     @State private var streamURLString = ""
     @State private var errorMessage: String?
 
-    private struct SampleStream: Identifiable {
+    private struct SampleStream: Identifiable, Hashable {
         let id = UUID()
         let title: String
         let description: String
@@ -113,7 +113,7 @@ public struct StreamInputSheet: View {
                 .font(.headline)
                 .foregroundColor(.primary)
 
-            ForEach(sampleStreams) { sample in
+            ForEach(sampleStreams, id: \.id) { sample in
                 Button(action: {
                     playSampleStream(sample)
                 }) {
@@ -137,7 +137,7 @@ public struct StreamInputSheet: View {
 
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.tertiaryLabel)
+                            .foregroundColor(Color(uiColor: .tertiaryLabel))
                     }
                     .padding(14)
                     .background(Color(.secondarySystemGroupedBackground))
