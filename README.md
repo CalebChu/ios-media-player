@@ -1,35 +1,24 @@
 # iOS Media Player
 
-> A modern, feature-rich native media player for iOS engineered with Swift and SwiftUI, featuring AVFoundation playback, Picture-in-Picture, background audio, intuitive gesture controls, persistent playback resumption, and an iOS Liquid Glass aesthetic.
+> A focused, lightweight media player for iOS built with Swift and SwiftUI. Delivers essential playback features done right—fast local and streaming media, fluid gestures, background audio, and seamless resumption in a clean Liquid Glass interface.
+
+---
+
+## About
+
+iOS Media Player strips away the bloat found in modern media players to focus strictly on what matters: smooth, reliable playback and an effortless user experience. 
+
+Designed to be lightweight and distraction-free, it provides the essential tools you need—responsive gestural controls, Picture-in-Picture, background playback, and automatic progress resumption—while staying out of the way. Built natively with Swift and SwiftUI, it integrates directly with iOS system media controls and embraces Apple's Liquid Glass aesthetic without unnecessary overhead.
 
 ---
 
 ## Features
 
-### 🎬 Core Playback & Media Engine
-- **Versatile Media Support**: Hardware-accelerated playback for local files (`.mp4`, `.mov`, `.m4v`, `.mp3`, `.m4a`, `.wav`) and live/VOD network streams (HLS `.m3u8`, HTTP/HTTPS direct streams) powered by `AVFoundation`. Live streams show their position relative to the live edge, with a **LIVE** button to jump back to it.
-- **Variable Playback Speeds**: Seamless speed adjustment (`0.5x`, `0.75x`, `1.0x`, `1.25x`, `1.5x`, `1.75x`, `2.0x`) with automatic pitch correction.
-- **Picture-in-Picture (PiP)**: Full `AVPictureInPictureController` integration for floating video playback across applications and home screen transitions.
-- **Background Audio**: Uninterrupted audio playback when locking the device or switching apps via `AVAudioSession` (`.playback` category).
-- **Lock Screen & Control Center**: Metadata synchronization (`MPNowPlayingInfoCenter`) and remote playback commands (`MPRemoteCommandCenter`) for play/pause, seeking, speed, and 10-second skip buttons.
-- **Interruption Handling**: Calls and other audio interruptions pause playback and resume it afterwards only if you were playing and didn't pause in the meantime.
-
-### 👆 Intuitive Gestural Controls
-- **Brightness Adjustment**: Swipe vertically on the left half of the screen with a floating liquid glass HUD.
-- **Volume Adjustment**: Swipe vertically on the right half of the screen with a responsive glass HUD indicator.
-- **Precision Scrubbing**: Swipe horizontally anywhere on the screen to preview time offsets (`+0:30`, `-1:15`) before seeking.
-- **Quick Skip**: Double-tap the left or right half of the screen to jump backward or forward by 10 seconds.
-- **Dynamic Controls Fade**: Single tap toggles the liquid glass overlay controls. They hide after 4 seconds of inactivity, but stay up while you scrub or use the speed menu.
-
-### 💾 Smart Resumption & Persistence
-- **Auto-Save Progress**: Records the playback position when you pause, seek, close the player, or the app moves to the background, and checkpoints every 15 seconds during playback. A force-quit loses at most the last few seconds. Live streams have no saved position.
-- **Security-Scoped Bookmarks**: Keeps access to files imported from the Files app across restarts. Bookmarks are refreshed when a file moves, and if a file is deleted or its provider becomes unavailable, the player says so and asks you to import it again.
-- **Continue Watching Shelf**: Quickly resume partially watched videos and podcasts, with a progress bar on each card.
-
-### 🫧 Liquid Glass Aesthetic
-- **Native Glass on iOS 26**: Toolbars and controls use SwiftUI's `.glassEffect()`, which refracts and adapts to the video behind it. Only interactive controls use interactive glass, and controls on the bottom bar use a tinted fill rather than stacking glass on glass.
-- **Material Fallback on iOS 17–18**: `.ultraThinMaterial` surfaces with subtle gradient border highlights approximate the look on earlier systems.
-- **Floating Pill Toolbars**: The top bar's glass controls are grouped in a `GlassEffectContainer` so they blend together.
+- **Essential Playback**: Fast, hardware-accelerated playback for local video/audio (`.mp4`, `.mov`, `.m4v`, `.mp3`, `.m4a`, `.wav`) and live/VOD streams (HLS `.m3u8`, direct URLs) with pitch-corrected speed adjustment (`0.5x`–`2.0x`).
+- **PiP & Background Audio**: Native Picture-in-Picture support and background playback with full Lock Screen and Control Center integration (`NowPlaying`).
+- **Direct Gesture Controls**: Fluid on-screen gestures for scrubbing, double-tap skip, and swipe-down to dismiss, plus vertical brightness and volume sliders—all individually customizable in Settings.
+- **Instant Resumption**: Automatically saves playback progress across app launches and maintains persistent access to imported files.
+- **Liquid Glass Interface**: Minimalist, unobtrusive controls utilizing native `.glassEffect()` on iOS 26 with an `.ultraThinMaterial` fallback for iOS 17–18.
 
 ---
 
