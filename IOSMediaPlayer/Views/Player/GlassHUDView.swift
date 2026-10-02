@@ -4,7 +4,6 @@ public enum HUDType: Equatable {
     case volume(Float)
     case brightness(Float)
     case seek(targetTime: TimeInterval, delta: TimeInterval)
-    case speed(PlaybackSpeed)
 }
 
 public struct GlassHUDView: View {
@@ -48,12 +47,6 @@ public struct GlassHUDView: View {
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(width: 24)
-
-        case .speed:
-            Image(systemName: "gauge.with.needle.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 24)
         }
     }
 
@@ -79,12 +72,6 @@ public struct GlassHUDView: View {
                     .fontDesign(.rounded)
                     .foregroundColor(.white.opacity(0.8))
             }
-
-        case .speed(let speed):
-            Text(speed.title)
-                .font(.headline.weight(.bold))
-                .fontDesign(.rounded)
-                .foregroundColor(.white)
         }
     }
 

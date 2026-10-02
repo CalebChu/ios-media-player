@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import OSLog
 
 public final class AVAudioSessionManager {
     public static let shared = AVAudioSessionManager()
@@ -9,6 +10,7 @@ public final class AVAudioSessionManager {
     public var onRouteChangeOldDeviceUnavailable: (() -> Void)?
 
     private var isConfigured = false
+    private let logger = Logger(subsystem: "com.calebchu.iosmediaplayer", category: "AudioSession")
 
     private init() {
         setupObservers()
@@ -26,7 +28,7 @@ public final class AVAudioSessionManager {
             try audioSession.setCategory(.playback, mode: .moviePlayback, options: [])
             isConfigured = true
         } catch {
-            print("Failed to configure AVAudioSession: \(error.localizedDescription)")
+            logger.error("Failed to configure AVAudioSession: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -34,7 +36,7 @@ public final class AVAudioSessionManager {
         do {
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            print("Failed to activate AVAudioSession: \(error.localizedDescription)")
+            logger.error("Failed to activate AVAudioSession: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -42,7 +44,7 @@ public final class AVAudioSessionManager {
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
-            print("Failed to deactivate AVAudioSession: \(error.localizedDescription)")
+            logger.error("Failed to deactivate AVAudioSession: \(error.localizedDescription, privacy: .public)")
         }
     }
 

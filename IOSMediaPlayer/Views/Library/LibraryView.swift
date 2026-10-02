@@ -47,6 +47,11 @@ public struct LibraryView: View {
             ) { result in
                 handleFileImport(result: result)
             }
+            // "Open in Media Player" from Files or another app.
+            .onOpenURL { url in
+                guard url.isFileURL else { return }
+                handleFileImport(result: .success([url]))
+            }
             .sheet(isPresented: $isShowingStreamSheet, onDismiss: {
                 if let item = pendingStreamPlaybackItem {
                     pendingStreamPlaybackItem = nil

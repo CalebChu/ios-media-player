@@ -24,7 +24,6 @@
 		200100000000000000000014 /* PlayerOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000014 /* PlayerOverlayView.swift */; };
 		200100000000000000000015 /* GlassHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000015 /* GlassHUDView.swift */; };
 		200100000000000000000016 /* LiquidGlassModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000016 /* LiquidGlassModifier.swift */; };
-		200100000000000000000017 /* LiquidGlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000017 /* LiquidGlassCard.swift */; };
 		200100000000000000000018 /* GlassScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000018 /* GlassScrubber.swift */; };
 		200100000000000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000020 /* Assets.xcassets */; };
 		200100000000000000000021 /* MediaItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000021 /* MediaItemTests.swift */; };
@@ -65,7 +64,6 @@
 		100100000000000000000014 /* PlayerOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerOverlayView.swift; sourceTree = "<group>"; };
 		100100000000000000000015 /* GlassHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassHUDView.swift; sourceTree = "<group>"; };
 		100100000000000000000016 /* LiquidGlassModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassModifier.swift; sourceTree = "<group>"; };
-		100100000000000000000017 /* LiquidGlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassCard.swift; sourceTree = "<group>"; };
 		100100000000000000000018 /* GlassScrubber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassScrubber.swift; sourceTree = "<group>"; };
 		100100000000000000000019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		100100000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -190,7 +188,6 @@
 			isa = PBXGroup;
 			children = (
 				100100000000000000000016 /* LiquidGlassModifier.swift */,
-				100100000000000000000017 /* LiquidGlassCard.swift */,
 				100100000000000000000018 /* GlassScrubber.swift */,
 			);
 			path = Components;
@@ -343,7 +340,6 @@
 				200100000000000000000014 /* PlayerOverlayView.swift in Sources */,
 				200100000000000000000015 /* GlassHUDView.swift in Sources */,
 				200100000000000000000016 /* LiquidGlassModifier.swift in Sources */,
-				200100000000000000000017 /* LiquidGlassCard.swift in Sources */,
 				200100000000000000000018 /* GlassScrubber.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -498,12 +494,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IOSMediaPlayer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Media Player";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -528,12 +518,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IOSMediaPlayer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Media Player";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
