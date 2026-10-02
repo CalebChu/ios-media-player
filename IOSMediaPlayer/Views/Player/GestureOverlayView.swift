@@ -19,6 +19,8 @@ public struct GestureOverlayView: View {
     @State private var hudDismissTask: Task<Void, Never>?
     /// Brightness before the first swipe in this player session, restored when the player closes.
     @State private var brightnessToRestore: CGFloat?
+    /// Fixed screen Y coordinate where the swipe down gesture began, immune to view movement.
+    @State private var initialDragLocationY: CGFloat = 0
 
     private enum DragDirection {
         case none
@@ -75,7 +77,7 @@ public struct GestureOverlayView: View {
                     }
             }
             .simultaneousGesture(
-                DragGesture(minimumDistance: 10)
+                DragGesture(minimumDistance: 10, coordinateSpace: .global)
                     .onChanged { value in
                         handleDragChanged(value: value, size: geometry.size)
                     }
@@ -117,10 +119,13 @@ public struct GestureOverlayView: View {
                 // Vertical gestures for brightness and volume are disallowed.
                 if translation.height > 0 {
                     dragDirection = .swipeDown
+                    initialDragLocationY = value.startLocation.y
                 }
             } else {
                 // Swipe down to exit is OFF: vertical brightness and volume are allowed.
-                if startLocation.x < (size.width / 2.0) {
+                let screenOriginX = currentScreen?.bounds.minX ?? 0
+                let localStartX = startLocation.x - screenOriginX
+                if localStartX < (size.width / 2.0) {
                     if settings.effectiveBrightnessGestureEnabled {
                         dragDirection = .verticalLeft
                         initialBrightness = currentScreen?.brightness ?? 0.5
@@ -139,7 +144,7 @@ public struct GestureOverlayView: View {
 
         switch dragDirection {
         case .swipeDown:
-            let pullDistance = max(0, translation.height)
+            let pullDistance = max(0, value.location.y - initialDragLocationY)
             onSwipeDownChanged?(pullDistance)
 
         case .verticalLeft:
@@ -170,9 +175,9 @@ public struct GestureOverlayView: View {
     private func handleDragEnded(value: DragGesture.Value) {
         switch dragDirection {
         case .swipeDown:
-            let translationY = value.translation.height
-            let predictedY = value.predictedEndTranslation.height
-            let shouldDismiss = translationY > 80 || (predictedY - translationY) > 120
+            let finalDistance = max(0, value.location.y - initialDragLocationY)
+            let velocityY = value.predictedEndLocation.y - value.location.y
+            let shouldDismiss = finalDistance > 80 || velocityY > 120
             onSwipeDownEnded?(shouldDismiss)
 
         case .horizontal:
@@ -188,6 +193,7 @@ public struct GestureOverlayView: View {
         }
 
         dragDirection = .none
+        initialDragLocationY = 0
     }
 
     private func setSystemVolume(_ volume: Float) {

@@ -19,16 +19,22 @@ public struct VideoPlayerContainerView: View {
 
     public var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            // Background backdrop: stays fixed, dims out as video pulls down
+            Color.black
+                .opacity(swipeDownOffset > 0 ? max(0.0, 1.0 - Double(swipeDownOffset / 400.0)) : 1.0)
+                .ignoresSafeArea()
 
-            // Video rendering layer
+            // Video rendering layer: moves with swipeDownOffset
             AVPlayerLayerView(
                 player: playbackManager.player,
                 videoGravity: playbackManager.videoGravity
             )
             .ignoresSafeArea()
+            .offset(y: swipeDownOffset)
 
-            // Gesture detection layer
+            // Gesture detection layer: stays STATIONARY at root window coordinates.
+            // This prevents the gesture's coordinate space from moving with the offset,
+            // completely eliminating the oscillation/flicker feedback loop.
             GestureOverlayView(
                 playbackManager: playbackManager,
                 settings: settingsStore,
@@ -59,23 +65,25 @@ public struct VideoPlayerContainerView: View {
             )
             .ignoresSafeArea()
 
-            // Floating Center HUD Toast
+            // Floating Center HUD Toast (moves with video)
             if let hud = activeHUD {
                 GlassHUDView(type: hud)
+                    .offset(y: swipeDownOffset)
                     .zIndex(10)
             }
 
-            // Buffering / Loading Indicator
+            // Buffering / Loading Indicator (moves with video)
             if playbackManager.playbackState == .buffering || playbackManager.playbackState == .loading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.6)
                     .padding(24)
                     .liquidGlassPill(specularOpacity: 0.4)
+                    .offset(y: swipeDownOffset)
                     .zIndex(5)
             }
 
-            // Error Overlay
+            // Error Overlay (moves with video)
             if case .failed(let message) = playbackManager.playbackState {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -101,10 +109,11 @@ public struct VideoPlayerContainerView: View {
                 }
                 .padding(24)
                 .liquidGlass(cornerRadius: 24, specularOpacity: 0.4)
+                .offset(y: swipeDownOffset)
                 .zIndex(6)
             }
 
-            // Top and Bottom Player Toolbars
+            // Top and Bottom Player Toolbars (on top of gesture layer, moves with video)
             if areControlsVisible {
                 PlayerOverlayView(
                     playbackManager: playbackManager,
@@ -124,11 +133,10 @@ public struct VideoPlayerContainerView: View {
                         resetAutoHideTimer()
                     }
                 )
+                .offset(y: swipeDownOffset)
                 .zIndex(8)
             }
         }
-        .offset(y: swipeDownOffset)
-        .opacity(swipeDownOffset > 0 ? max(0.4, 1.0 - Double(swipeDownOffset / 500.0)) : 1.0)
         .statusBarHidden(!areControlsVisible)
         .onAppear {
             scheduleAutoHideTimer()
