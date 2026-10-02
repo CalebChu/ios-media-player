@@ -69,18 +69,21 @@ public struct GlassHUDView: View {
         case .seek(let targetTime, let delta):
             VStack(alignment: .leading, spacing: 2) {
                 Text(MediaItem.formatTime(targetTime))
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .font(.headline.weight(.bold))
+                    .fontDesign(.rounded)
                     .foregroundColor(.white)
 
                 let sign = delta >= 0 ? "+" : "-"
                 Text("\(sign)\(MediaItem.formatTime(abs(delta)))")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .font(.footnote.weight(.medium))
+                    .fontDesign(.rounded)
                     .foregroundColor(.white.opacity(0.8))
             }
 
         case .speed(let speed):
             Text(speed.title)
-                .font(.system(size: 17, weight: .bold, design: .rounded))
+                .font(.headline.weight(.bold))
+                .fontDesign(.rounded)
                 .foregroundColor(.white)
         }
     }

@@ -7,6 +7,8 @@ public struct VideoPlayerContainerView: View {
     @State private var areControlsVisible = true
     @State private var activeHUD: HUDType?
     @State private var autoHideTimerTask: Task<Void, Never>?
+    /// True while the user is scrubbing or has a control menu open; auto-hide waits until it clears.
+    @State private var isInteractingWithControls = false
 
     public init(playbackManager: PlaybackManager) {
         self.playbackManager = playbackManager
@@ -75,8 +77,8 @@ public struct VideoPlayerContainerView: View {
                         dismiss()
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .liquidGlassPill(specularOpacity: 0.4)
+                    .frame(minHeight: 44)
+                    .liquidGlassPill(specularOpacity: 0.4, isInteractive: true)
                 }
                 .padding(24)
                 .liquidGlass(cornerRadius: 24, specularOpacity: 0.4)
@@ -90,6 +92,17 @@ public struct VideoPlayerContainerView: View {
                     onDismiss: {
                         playbackManager.persistCurrentProgress()
                         dismiss()
+                    },
+                    onInteractionChanged: { isInteracting in
+                        isInteractingWithControls = isInteracting
+                        if isInteracting {
+                            autoHideTimerTask?.cancel()
+                        } else {
+                            resetAutoHideTimer()
+                        }
+                    },
+                    onInteraction: {
+                        resetAutoHideTimer()
                     }
                 )
                 .zIndex(8)
@@ -111,6 +124,8 @@ public struct VideoPlayerContainerView: View {
     }
 
     private func toggleControls() {
+        // A tap on the video also dismisses any open menu, so stop treating the controls as in use.
+        isInteractingWithControls = false
         withAnimation(.easeInOut(duration: 0.25)) {
             areControlsVisible.toggle()
         }
@@ -129,15 +144,13 @@ public struct VideoPlayerContainerView: View {
 
     private func scheduleAutoHideTimer() {
         autoHideTimerTask?.cancel()
-        autoHideTimerTask = Task {
-            try? await Task.sleep(nanoseconds: 4_000_000_000)
-            guard !Task.isCancelled else { return }
-            await MainActor.run {
-                if playbackManager.isPlaying {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        areControlsVisible = false
-                    }
-                }
+        autoHideTimerTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(4))
+            guard !Task.isCancelled,
+                  !isInteractingWithControls,
+                  playbackManager.isPlaying else { return }
+            withAnimation(.easeInOut(duration: 0.25)) {
+                areControlsVisible = false
             }
         }
     }

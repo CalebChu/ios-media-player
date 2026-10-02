@@ -9,6 +9,7 @@ public struct LibraryView: View {
     @State private var isShowingStreamSheet = false
     @State private var isPlayerPresented = false
     @State private var pendingStreamPlaybackItem: MediaItem?
+    @State private var importErrorMessage: String?
 
     public init() {}
 
@@ -56,6 +57,15 @@ public struct LibraryView: View {
                     pendingStreamPlaybackItem = mediaItem
                 }
             }
+            .alert(
+                "Couldn't Import Files",
+                isPresented: Binding(
+                    get: { importErrorMessage != nil },
+                    set: { if !$0 { importErrorMessage = nil } }
+                ),
+                actions: { Button("OK", role: .cancel) {} },
+                message: { Text(importErrorMessage ?? "") }
+            )
             .fullScreenCover(isPresented: $isPlayerPresented) {
                 VideoPlayerContainerView(playbackManager: playbackManager)
             }
@@ -115,39 +125,43 @@ public struct LibraryView: View {
                     .frame(width: 32, height: 32)
                     .liquidGlassPill(specularOpacity: 0.5)
 
-                // Progress Bar at bottom of card
+                // Progress Bar at bottom of card, sized to the inset track so it never overflows.
                 VStack {
                     Spacer()
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.black.opacity(0.3))
-                            .frame(height: 5)
+                    GeometryReader { track in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.black.opacity(0.3))
 
-                        Capsule()
-                            .fill(Color.accentColor)
-                            .frame(width: 220 * CGFloat(item.progressFraction), height: 5)
+                            Capsule()
+                                .fill(Color.accentColor)
+                                .frame(width: track.size.width * CGFloat(item.progressFraction))
+                        }
                     }
+                    .frame(height: 5)
                     .padding(.horizontal, 8)
                     .padding(.bottom, 6)
                 }
+                .frame(width: 220, height: 124)
+                .accessibilityHidden(true)
             }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.title)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .foregroundColor(.primary)
 
                 HStack {
                     Text(item.formattedLastPosition)
-                        .font(.system(size: 12))
+                        .font(.caption)
                         .foregroundColor(.secondary)
 
                     Spacer()
 
                     let percent = Int(item.progressFraction * 100)
                     Text("\(percent)%")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundColor(.accentColor)
                 }
             }
@@ -279,20 +293,20 @@ public struct LibraryView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .foregroundColor(.primary)
 
                 HStack(spacing: 8) {
                     if item.duration > 0 {
                         Text(item.formattedDuration)
-                            .font(.system(size: 12))
+                            .font(.caption)
                             .foregroundColor(.secondary)
                     }
 
                     if item.isRemote {
                         Text("Stream")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.caption2.weight(.bold))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.accentColor.opacity(0.15))
@@ -302,7 +316,7 @@ public struct LibraryView: View {
 
                     if item.isCompleted {
                         Text("Completed")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.caption2.weight(.bold))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.green.opacity(0.15))
@@ -328,7 +342,7 @@ public struct LibraryView: View {
         case .success(let urls):
             for url in urls {
                 let bookmark = progressStore.createSecurityScopedBookmark(for: url)
-                let isAudio = ["mp3", "m4a", "wav", "aac"].contains(url.pathExtension.lowercased())
+                let isAudio = UTType(filenameExtension: url.pathExtension)?.conforms(to: .audio) ?? false
                 let item = MediaItem(
                     title: url.deletingPathExtension().lastPathComponent,
                     url: url,
@@ -344,7 +358,7 @@ public struct LibraryView: View {
             }
 
         case .failure(let error):
-            print("Failed to import files: \(error.localizedDescription)")
+            importErrorMessage = error.localizedDescription
         }
     }
 

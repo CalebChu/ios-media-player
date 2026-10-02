@@ -58,20 +58,37 @@ public struct LiquidGlassModifier: ViewModifier {
 public struct LiquidGlassPillModifier: ViewModifier {
     public var specularOpacity: Double
     public var material: Material
+    /// Whether the glass reacts to touch. Only true for controls.
+    public var isInteractive: Bool
+    /// Whether the pill sits on another glass surface. Glass can't sample other glass, so on iOS 26
+    /// nested pills use a plain tinted fill instead of a second glass layer.
+    public var isNested: Bool
 
     public init(
         specularOpacity: Double = 0.4,
-        material: Material = .ultraThinMaterial
+        material: Material = .ultraThinMaterial,
+        isInteractive: Bool = false,
+        isNested: Bool = false
     ) {
         self.specularOpacity = specularOpacity
         self.material = material
+        self.isInteractive = isInteractive
+        self.isNested = isNested
     }
 
     @ViewBuilder
     public func body(content: Content) -> some View {
         if #available(iOS 26, *) {
-            content
-                .glassEffect(.regular.interactive(), in: .capsule)
+            if isNested {
+                content
+                    .background {
+                        Capsule()
+                            .fill(Color.white.opacity(0.14))
+                    }
+            } else {
+                content
+                    .glassEffect(isInteractive ? Glass.regular.interactive() : Glass.regular, in: .capsule)
+            }
         } else {
             content
                 .background {
@@ -118,12 +135,16 @@ public extension View {
 
     func liquidGlassPill(
         specularOpacity: Double = 0.4,
-        material: Material = .ultraThinMaterial
+        material: Material = .ultraThinMaterial,
+        isInteractive: Bool = false,
+        isNested: Bool = false
     ) -> some View {
         modifier(
             LiquidGlassPillModifier(
                 specularOpacity: specularOpacity,
-                material: material
+                material: material,
+                isInteractive: isInteractive,
+                isNested: isNested
             )
         )
     }

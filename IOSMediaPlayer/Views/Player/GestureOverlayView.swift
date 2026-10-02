@@ -13,6 +13,9 @@ public struct GestureOverlayView: View {
     @State private var initialSeekTime: TimeInterval = 0
     @State private var currentSeekDelta: TimeInterval = 0
     @State private var volumeSlider: UISlider?
+    @State private var hudDismissTask: Task<Void, Never>?
+    /// Brightness before the first swipe in this player session, restored when the player closes.
+    @State private var brightnessToRestore: CGFloat?
 
     private enum DragDirection {
         case none
@@ -43,13 +46,16 @@ public struct GestureOverlayView: View {
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture(count: 2, coordinateSpace: .local) { location in
+                        let interval = NowPlayingManager.skipInterval
+                        let startTime = playbackManager.currentTime
                         if location.x < (geometry.size.width / 2.0) {
-                            playbackManager.skipBackward(seconds: 10)
-                            onHUDUpdate(.seek(targetTime: playbackManager.currentTime, delta: -10))
+                            playbackManager.skipBackward(seconds: interval)
                         } else {
-                            playbackManager.skipForward(seconds: 10)
-                            onHUDUpdate(.seek(targetTime: playbackManager.currentTime, delta: 10))
+                            playbackManager.skipForward(seconds: interval)
                         }
+                        // Report the actual jump, which is shorter near either end of the timeline.
+                        let target = playbackManager.currentTime
+                        onHUDUpdate(.seek(targetTime: target, delta: target - startTime))
                         scheduleHUDDismiss()
                     }
                     .onTapGesture(count: 1) {
@@ -66,6 +72,20 @@ public struct GestureOverlayView: View {
                     }
             )
         }
+        .onDisappear {
+            hudDismissTask?.cancel()
+            if let brightness = brightnessToRestore, let screen = currentScreen {
+                screen.brightness = brightness
+            }
+        }
+    }
+
+    /// The screen showing the player. Replaces the deprecated `UIScreen.main`.
+    private var currentScreen: UIScreen? {
+        return UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }?
+            .screen
     }
 
     private func handleDragChanged(value: DragGesture.Value, size: CGSize) {
@@ -73,13 +93,17 @@ public struct GestureOverlayView: View {
         let startLocation = value.startLocation
 
         if dragDirection == .none {
+            hudDismissTask?.cancel()
             let isHorizontal = abs(translation.width) > abs(translation.height)
             if isHorizontal {
                 dragDirection = .horizontal
                 initialSeekTime = playbackManager.currentTime
             } else if startLocation.x < (size.width / 2.0) {
                 dragDirection = .verticalLeft
-                initialBrightness = UIScreen.main.brightness
+                initialBrightness = currentScreen?.brightness ?? 0.5
+                if brightnessToRestore == nil {
+                    brightnessToRestore = initialBrightness
+                }
             } else {
                 dragDirection = .verticalRight
                 initialVolume = volumeSlider?.value ?? AVAudioSession.sharedInstance().outputVolume
@@ -90,7 +114,7 @@ public struct GestureOverlayView: View {
         case .verticalLeft:
             let delta = -translation.height / (size.height * 0.75)
             let newBrightness = min(max(initialBrightness + delta, 0.0), 1.0)
-            UIScreen.main.brightness = newBrightness
+            currentScreen?.brightness = newBrightness
             onHUDUpdate(.brightness(Float(newBrightness)))
 
         case .verticalRight:
@@ -130,8 +154,13 @@ public struct GestureOverlayView: View {
         }
     }
 
+    /// Hides the HUD 1.2s after the latest update. Each call replaces the previous timer, so an
+    /// earlier gesture can't hide a newer HUD early.
     private func scheduleHUDDismiss() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        hudDismissTask?.cancel()
+        hudDismissTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(1200))
+            guard !Task.isCancelled else { return }
             onHUDUpdate(nil)
         }
     }
