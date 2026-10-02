@@ -34,36 +34,24 @@ public struct GestureOverlayView: View {
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Color.clear
-                    .contentShape(Rectangle())
-
                 // Hidden volume view to allow system volume control without system HUD
                 HiddenVolumeView(sliderBinding: $volumeSlider)
                     .frame(width: 0, height: 0)
                     .opacity(0.001)
 
-                // Double tap left / right detectors
-                HStack(spacing: 0) {
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture(count: 2) {
-                            playbackManager.skipBackward(seconds: 10)
-                            onHUDUpdate(.seek(targetTime: max(0, playbackManager.currentTime - 10), delta: -10))
-                            scheduleHUDDismiss()
-                        }
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture(count: 2) {
-                            playbackManager.skipForward(seconds: 10)
-                            let target = min(playbackManager.duration, playbackManager.currentTime + 10)
-                            onHUDUpdate(.seek(targetTime: target, delta: 10))
-                            scheduleHUDDismiss()
-                        }
-                }
-
-                // Single tap detector
+                // Single and double tap detector
                 Color.clear
                     .contentShape(Rectangle())
+                    .onTapGesture(count: 2, coordinateSpace: .local) { location in
+                        if location.x < (geometry.size.width / 2.0) {
+                            playbackManager.skipBackward(seconds: 10)
+                            onHUDUpdate(.seek(targetTime: playbackManager.currentTime, delta: -10))
+                        } else {
+                            playbackManager.skipForward(seconds: 10)
+                            onHUDUpdate(.seek(targetTime: playbackManager.currentTime, delta: 10))
+                        }
+                        scheduleHUDDismiss()
+                    }
                     .onTapGesture(count: 1) {
                         onSingleTap()
                     }
