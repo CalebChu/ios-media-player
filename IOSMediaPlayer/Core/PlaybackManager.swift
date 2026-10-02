@@ -32,6 +32,7 @@ public final class PlaybackManager: ObservableObject {
     private var loadedTimeRangesObservation: NSKeyValueObservation?
     private var seekableTimeRangesObservation: NSKeyValueObservation?
     private var activeSecurityScopedURL: URL?
+    private var wasPlayingBeforeInterruption = false
     private var cancellables = Set<AnyCancellable>()
 
     public init() {
@@ -307,15 +308,19 @@ public final class PlaybackManager: ObservableObject {
         let audioManager = AVAudioSessionManager.shared
         audioManager.onInterruptionBegan = { [weak self] in
             Task { @MainActor [weak self] in
-                self?.pause()
+                guard let self = self else { return }
+                self.wasPlayingBeforeInterruption = self.isPlaying
+                self.pause()
             }
         }
 
         audioManager.onInterruptionEnded = { [weak self] shouldResume in
             Task { @MainActor [weak self] in
-                if shouldResume {
-                    self?.play()
+                guard let self = self else { return }
+                if shouldResume && self.wasPlayingBeforeInterruption {
+                    self.play()
                 }
+                self.wasPlayingBeforeInterruption = false
             }
         }
 
