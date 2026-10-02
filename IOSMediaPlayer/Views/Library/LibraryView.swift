@@ -8,6 +8,7 @@ public struct LibraryView: View {
     @State private var isShowingFileImporter = false
     @State private var isShowingStreamSheet = false
     @State private var isPlayerPresented = false
+    @State private var pendingStreamPlaybackItem: MediaItem?
 
     public init() {}
 
@@ -45,9 +46,14 @@ public struct LibraryView: View {
             ) { result in
                 handleFileImport(result: result)
             }
-            .sheet(isPresented: $isShowingStreamSheet) {
+            .sheet(isPresented: $isShowingStreamSheet, onDismiss: {
+                if let item = pendingStreamPlaybackItem {
+                    pendingStreamPlaybackItem = nil
+                    startPlayback(for: item)
+                }
+            }) {
                 StreamInputSheet { mediaItem in
-                    startPlayback(for: mediaItem)
+                    pendingStreamPlaybackItem = mediaItem
                 }
             }
             .fullScreenCover(isPresented: $isPlayerPresented) {
