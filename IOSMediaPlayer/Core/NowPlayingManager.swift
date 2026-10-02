@@ -4,6 +4,9 @@ import MediaPlayer
 public final class NowPlayingManager {
     public static let shared = NowPlayingManager()
 
+    /// Matches the in-app skip buttons and double-tap gestures.
+    public static let skipInterval: TimeInterval = 10
+
     public var onPlay: (() -> Void)?
     public var onPause: (() -> Void)?
     public var onTogglePlayPause: (() -> Void)?
@@ -40,10 +43,10 @@ public final class NowPlayingManager {
         }
 
         commandCenter.skipForwardCommand.isEnabled = true
-        commandCenter.skipForwardCommand.preferredIntervals = [15.0]
+        commandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: NowPlayingManager.skipInterval)]
         commandCenter.skipForwardCommand.addTarget { [weak self] event in
             guard let skipEvent = event as? MPSkipIntervalCommandEvent else {
-                self?.onSkipForward?(15.0)
+                self?.onSkipForward?(NowPlayingManager.skipInterval)
                 return .success
             }
             self?.onSkipForward?(skipEvent.interval)
@@ -51,10 +54,10 @@ public final class NowPlayingManager {
         }
 
         commandCenter.skipBackwardCommand.isEnabled = true
-        commandCenter.skipBackwardCommand.preferredIntervals = [15.0]
+        commandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: NowPlayingManager.skipInterval)]
         commandCenter.skipBackwardCommand.addTarget { [weak self] event in
             guard let skipEvent = event as? MPSkipIntervalCommandEvent else {
-                self?.onSkipBackward?(15.0)
+                self?.onSkipBackward?(NowPlayingManager.skipInterval)
                 return .success
             }
             self?.onSkipBackward?(skipEvent.interval)
@@ -71,7 +74,7 @@ public final class NowPlayingManager {
         }
 
         commandCenter.changePlaybackRateCommand.isEnabled = true
-        commandCenter.changePlaybackRateCommand.supportedPlaybackRates = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+        commandCenter.changePlaybackRateCommand.supportedPlaybackRates = PlaybackSpeed.allCases.map { NSNumber(value: $0.rawValue) }
         commandCenter.changePlaybackRateCommand.addTarget { [weak self] event in
             guard let rateEvent = event as? MPChangePlaybackRateCommandEvent else {
                 return .commandFailed
@@ -87,6 +90,7 @@ public final class NowPlayingManager {
         title: String,
         artist: String? = nil,
         duration: TimeInterval,
+        isLiveStream: Bool = false,
         elapsed: TimeInterval,
         rate: Float
     ) {
@@ -94,14 +98,15 @@ public final class NowPlayingManager {
             MPMediaItemPropertyTitle: title,
             MPNowPlayingInfoPropertyPlaybackRate: Double(rate),
             MPNowPlayingInfoPropertyDefaultPlaybackRate: 1.0,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: elapsed
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: elapsed,
+            MPNowPlayingInfoPropertyIsLiveStream: isLiveStream
         ]
 
         if let artist = artist, !artist.isEmpty {
             info[MPMediaItemPropertyArtist] = artist
         }
 
-        if duration > 0 && !duration.isNaN && !duration.isInfinite {
+        if !isLiveStream && duration > 0 && duration.isFinite {
             info[MPMediaItemPropertyPlaybackDuration] = duration
         }
 

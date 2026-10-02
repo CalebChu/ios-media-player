@@ -20,6 +20,24 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.video</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Audiovisual Content</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.movie</string>
+				<string>public.audio</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
@@ -47,6 +65,8 @@
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<!-- Deliberate: this is a general-purpose URL player, so plain-HTTP media streams are allowed.
+		     The stream sheet warns before playing one. Other network loads still require HTTPS. -->
 		<key>NSAllowsArbitraryLoadsForMedia</key>
 		<true/>
 	</dict>

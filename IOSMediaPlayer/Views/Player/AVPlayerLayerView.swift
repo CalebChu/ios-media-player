@@ -2,6 +2,8 @@ import AVFoundation
 import SwiftUI
 import UIKit
 
+/// Shows the app's shared video view. Every presentation embeds the same `PlayerLayerUIView`,
+/// so Picture in Picture keeps one controller and can restore into whichever player is on screen.
 public struct AVPlayerLayerView: UIViewRepresentable {
     public let player: AVPlayer
     public let videoGravity: AVLayerVideoGravity
@@ -11,41 +13,60 @@ public struct AVPlayerLayerView: UIViewRepresentable {
         self.videoGravity = videoGravity
     }
 
-    public func makeUIView(context: Context) -> PlayerContainerUIView {
-        let view = PlayerContainerUIView()
-        view.playerLayer.player = player
-        view.playerLayer.videoGravity = videoGravity
-        view.backgroundColor = .black
-
-        PictureInPictureManager.shared.setup(with: view.playerLayer)
-        return view
+    public func makeUIView(context: Context) -> PlayerHostView {
+        let host = PlayerHostView()
+        host.backgroundColor = .black
+        return host
     }
 
-    public func updateUIView(_ uiView: PlayerContainerUIView, context: Context) {
-        if uiView.playerLayer.player != player {
-            uiView.playerLayer.player = player
-            PictureInPictureManager.shared.setup(with: uiView.playerLayer)
-        }
-        if uiView.playerLayer.videoGravity != videoGravity {
-            uiView.playerLayer.videoGravity = videoGravity
+    public func updateUIView(_ host: PlayerHostView, context: Context) {
+        let pipManager = PictureInPictureManager.shared
+        pipManager.attach(player: player)
+        host.embedPlayerView()
+
+        let playerLayer = pipManager.playerView.playerLayer
+        if playerLayer.videoGravity != videoGravity {
+            playerLayer.videoGravity = videoGravity
         }
     }
+}
 
-    public final class PlayerContainerUIView: UIView {
-        public override static var layerClass: AnyClass {
-            return AVPlayerLayer.self
-        }
+/// Hosts the shared `PlayerLayerUIView` and reports when it is back on screen.
+public final class PlayerHostView: UIView {
+    func embedPlayerView() {
+        let playerView = PictureInPictureManager.shared.playerView
+        guard playerView.superview !== self else { return }
+        playerView.removeFromSuperview()
+        playerView.frame = bounds
+        playerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(playerView)
+    }
 
-        public var playerLayer: AVPlayerLayer {
-            return layer as! AVPlayerLayer
-        }
+    public override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard window != nil else { return }
+        embedPlayerView()
+        PictureInPictureManager.shared.playerViewDidAppear()
+    }
+}
 
-        public override func layoutSubviews() {
-            super.layoutSubviews()
-            CATransaction.begin()
-            CATransaction.setDisableActions(true)
-            playerLayer.frame = bounds
-            CATransaction.commit()
-        }
+/// A view backed by an `AVPlayerLayer`, so the layer always matches the view's bounds.
+public final class PlayerLayerUIView: UIView {
+    public override static var layerClass: AnyClass {
+        return AVPlayerLayer.self
+    }
+
+    public var playerLayer: AVPlayerLayer {
+        return layer as! AVPlayerLayer
+    }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .black
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        backgroundColor = .black
     }
 }

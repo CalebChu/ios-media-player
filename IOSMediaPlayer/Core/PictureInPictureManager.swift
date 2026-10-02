@@ -1,6 +1,7 @@
 import AVKit
-import Foundation
 import Combine
+import Foundation
+import OSLog
 
 @MainActor
 public final class PictureInPictureManager: NSObject, ObservableObject {
@@ -9,42 +10,54 @@ public final class PictureInPictureManager: NSObject, ObservableObject {
     @Published public private(set) var isPiPActive = false
     @Published public private(set) var isPiPPossible = false
 
-    public var onRestoreUserInterface: ((@escaping (Bool) -> Void) -> Void)?
+    /// Asks the UI to present the full-screen player so PiP can hand playback back to it.
+    /// The restore finishes once the player's video view is back in a window.
+    public var onRestoreUserInterface: (() -> Void)?
+
+    /// The one view that renders video. Player presentations embed this view instead of creating
+    /// their own layer, so the PiP controller is created once and never replaced while active.
+    public let playerView = PlayerLayerUIView()
 
     private var pipController: AVPictureInPictureController?
     private var pipPossibleObservation: NSKeyValueObservation?
+    private var pendingRestoreCompletion: ((Bool) -> Void)?
+    private let logger = Logger(subsystem: "com.calebchu.iosmediaplayer", category: "PictureInPicture")
+
+    /// If the player never reappears (for example, the presentation is blocked), finish the restore anyway
+    /// so AVKit doesn't wait indefinitely.
+    private static let restoreTimeout: Duration = .seconds(2)
 
     public var isPiPSupported: Bool {
         return AVPictureInPictureController.isPictureInPictureSupported()
     }
 
-    public override init() {
+    private override init() {
         super.init()
     }
 
-    deinit {
-        pipPossibleObservation?.invalidate()
-    }
-
-    public func setup(with playerLayer: AVPlayerLayer) {
-        guard isPiPSupported else { return }
-
-        pipPossibleObservation?.invalidate()
-        pipPossibleObservation = nil
-
-        if let existing = pipController, existing.isPictureInPictureActive {
-            existing.stopPictureInPicture()
+    public func attach(player: AVPlayer) {
+        if playerView.playerLayer.player !== player {
+            playerView.playerLayer.player = player
         }
 
-        pipController = AVPictureInPictureController(playerLayer: playerLayer)
-        pipController?.delegate = self
-        pipController?.canStartPictureInPictureAutomaticallyFromInline = true
+        guard isPiPSupported, pipController == nil,
+              let controller = AVPictureInPictureController(playerLayer: playerView.playerLayer) else { return }
 
-        pipPossibleObservation = pipController?.observe(\.isPictureInPicturePossible, options: [.initial, .new]) { [weak self] controller, _ in
+        controller.delegate = self
+        controller.canStartPictureInPictureAutomaticallyFromInline = true
+        pipController = controller
+
+        pipPossibleObservation = controller.observe(\.isPictureInPicturePossible, options: [.initial, .new]) { [weak self] controller, _ in
+            let isPossible = controller.isPictureInPicturePossible
             Task { @MainActor [weak self] in
-                self?.isPiPPossible = controller.isPictureInPicturePossible
+                self?.isPiPPossible = isPossible
             }
         }
+    }
+
+    /// Called by the player's host view whenever it enters a window.
+    public func playerViewDidAppear() {
+        completePendingRestore(true)
     }
 
     public func startPiP() {
@@ -64,6 +77,12 @@ public final class PictureInPictureManager: NSObject, ObservableObject {
             startPiP()
         }
     }
+
+    private func completePendingRestore(_ restored: Bool) {
+        guard let completion = pendingRestoreCompletion else { return }
+        pendingRestoreCompletion = nil
+        completion(restored)
+    }
 }
 
 extension PictureInPictureManager: @preconcurrency AVPictureInPictureControllerDelegate {
@@ -75,12 +94,9 @@ extension PictureInPictureManager: @preconcurrency AVPictureInPictureControllerD
         isPiPActive = true
     }
 
-    public func pictureInPictureControllerWillStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        // Will stop
-    }
-
     public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         isPiPActive = false
+        completePendingRestore(false)
     }
 
     public func pictureInPictureController(
@@ -88,17 +104,31 @@ extension PictureInPictureManager: @preconcurrency AVPictureInPictureControllerD
         failedToStartPictureInPictureWithError error: Error
     ) {
         isPiPActive = false
-        print("PiP failed to start: \(error.localizedDescription)")
+        logger.error("PiP failed to start: \(error.localizedDescription, privacy: .public)")
     }
 
     public func pictureInPictureController(
         _ pictureInPictureController: AVPictureInPictureController,
         restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
     ) {
-        if let restoreHandler = onRestoreUserInterface {
-            restoreHandler(completionHandler)
-        } else {
+        // The player is still on screen: nothing to present.
+        if playerView.window != nil {
             completionHandler(true)
+            return
+        }
+
+        guard let presentPlayer = onRestoreUserInterface else {
+            completionHandler(false)
+            return
+        }
+
+        completePendingRestore(false)
+        pendingRestoreCompletion = completionHandler
+        presentPlayer()
+
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: PictureInPictureManager.restoreTimeout)
+            self?.completePendingRestore(true)
         }
     }
 }

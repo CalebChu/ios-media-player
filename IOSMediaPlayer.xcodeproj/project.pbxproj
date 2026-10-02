@@ -15,6 +15,7 @@
 		200100000000000000000006 /* PlaybackProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000006 /* PlaybackProgressStore.swift */; };
 		200100000000000000000007 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000007 /* MediaItem.swift */; };
 		200100000000000000000008 /* PlaybackSpeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000008 /* PlaybackSpeed.swift */; };
+		200100000000000000000024 /* PlaybackTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000024 /* PlaybackTimeline.swift */; };
 		200100000000000000000009 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000009 /* LibraryView.swift */; };
 		200100000000000000000010 /* StreamInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000010 /* StreamInputSheet.swift */; };
 		200100000000000000000011 /* VideoPlayerContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000011 /* VideoPlayerContainerView.swift */; };
@@ -23,12 +24,13 @@
 		200100000000000000000014 /* PlayerOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000014 /* PlayerOverlayView.swift */; };
 		200100000000000000000015 /* GlassHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000015 /* GlassHUDView.swift */; };
 		200100000000000000000016 /* LiquidGlassModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000016 /* LiquidGlassModifier.swift */; };
-		200100000000000000000017 /* LiquidGlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000017 /* LiquidGlassCard.swift */; };
 		200100000000000000000018 /* GlassScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000018 /* GlassScrubber.swift */; };
 		200100000000000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000020 /* Assets.xcassets */; };
 		200100000000000000000021 /* MediaItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000021 /* MediaItemTests.swift */; };
 		200100000000000000000022 /* PlaybackSpeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000022 /* PlaybackSpeedTests.swift */; };
 		200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000023 /* PlaybackProgressStoreTests.swift */; };
+		200100000000000000000026 /* PlaybackManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000026 /* PlaybackManagerTests.swift */; };
+		200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000025 /* PlaybackTimelineTests.swift */; };
 		200100000000000000000030 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000030 /* AVFoundation.framework */; };
 		200100000000000000000031 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000031 /* AVKit.framework */; };
 		200100000000000000000032 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000032 /* MediaPlayer.framework */; };
@@ -53,6 +55,7 @@
 		100100000000000000000006 /* PlaybackProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackProgressStore.swift; sourceTree = "<group>"; };
 		100100000000000000000007 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		100100000000000000000008 /* PlaybackSpeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSpeed.swift; sourceTree = "<group>"; };
+		100100000000000000000024 /* PlaybackTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTimeline.swift; sourceTree = "<group>"; };
 		100100000000000000000009 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		100100000000000000000010 /* StreamInputSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamInputSheet.swift; sourceTree = "<group>"; };
 		100100000000000000000011 /* VideoPlayerContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerContainerView.swift; sourceTree = "<group>"; };
@@ -61,13 +64,14 @@
 		100100000000000000000014 /* PlayerOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerOverlayView.swift; sourceTree = "<group>"; };
 		100100000000000000000015 /* GlassHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassHUDView.swift; sourceTree = "<group>"; };
 		100100000000000000000016 /* LiquidGlassModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassModifier.swift; sourceTree = "<group>"; };
-		100100000000000000000017 /* LiquidGlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassCard.swift; sourceTree = "<group>"; };
 		100100000000000000000018 /* GlassScrubber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassScrubber.swift; sourceTree = "<group>"; };
 		100100000000000000000019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		100100000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		100100000000000000000021 /* MediaItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItemTests.swift; sourceTree = "<group>"; };
 		100100000000000000000022 /* PlaybackSpeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSpeedTests.swift; sourceTree = "<group>"; };
 		100100000000000000000023 /* PlaybackProgressStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackProgressStoreTests.swift; sourceTree = "<group>"; };
+		100100000000000000000026 /* PlaybackManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackManagerTests.swift; sourceTree = "<group>"; };
+		100100000000000000000025 /* PlaybackTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTimelineTests.swift; sourceTree = "<group>"; };
 		100100000000000000000030 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		100100000000000000000031 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		100100000000000000000032 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -145,6 +149,7 @@
 			children = (
 				100100000000000000000007 /* MediaItem.swift */,
 				100100000000000000000008 /* PlaybackSpeed.swift */,
+				100100000000000000000024 /* PlaybackTimeline.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -183,7 +188,6 @@
 			isa = PBXGroup;
 			children = (
 				100100000000000000000016 /* LiquidGlassModifier.swift */,
-				100100000000000000000017 /* LiquidGlassCard.swift */,
 				100100000000000000000018 /* GlassScrubber.swift */,
 			);
 			path = Components;
@@ -195,6 +199,8 @@
 				100100000000000000000021 /* MediaItemTests.swift */,
 				100100000000000000000022 /* PlaybackSpeedTests.swift */,
 				100100000000000000000023 /* PlaybackProgressStoreTests.swift */,
+				100100000000000000000026 /* PlaybackManagerTests.swift */,
+				100100000000000000000025 /* PlaybackTimelineTests.swift */,
 			);
 			path = IOSMediaPlayerTests;
 			sourceTree = "<group>";
@@ -325,6 +331,7 @@
 				200100000000000000000006 /* PlaybackProgressStore.swift in Sources */,
 				200100000000000000000007 /* MediaItem.swift in Sources */,
 				200100000000000000000008 /* PlaybackSpeed.swift in Sources */,
+				200100000000000000000024 /* PlaybackTimeline.swift in Sources */,
 				200100000000000000000009 /* LibraryView.swift in Sources */,
 				200100000000000000000010 /* StreamInputSheet.swift in Sources */,
 				200100000000000000000011 /* VideoPlayerContainerView.swift in Sources */,
@@ -333,7 +340,6 @@
 				200100000000000000000014 /* PlayerOverlayView.swift in Sources */,
 				200100000000000000000015 /* GlassHUDView.swift in Sources */,
 				200100000000000000000016 /* LiquidGlassModifier.swift in Sources */,
-				200100000000000000000017 /* LiquidGlassCard.swift in Sources */,
 				200100000000000000000018 /* GlassScrubber.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -345,6 +351,8 @@
 				200100000000000000000021 /* MediaItemTests.swift in Sources */,
 				200100000000000000000022 /* PlaybackSpeedTests.swift in Sources */,
 				200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */,
+				200100000000000000000026 /* PlaybackManagerTests.swift in Sources */,
+				200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -486,12 +494,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IOSMediaPlayer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Media Player";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -516,12 +518,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = IOSMediaPlayer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Media Player";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -2,39 +2,50 @@ import SwiftUI
 
 public struct GlassScrubber: View {
     public let currentTime: TimeInterval
-    public let duration: TimeInterval
+    public let timeline: PlaybackTimeline
     public let bufferedTime: TimeInterval
     public let onSeek: (TimeInterval) -> Void
+    /// Called with `true` when a drag begins and `false` when it ends, so callers can keep controls visible.
+    public let onEditingChanged: (Bool) -> Void
 
     @State private var isDragging = false
     @State private var dragPosition: Double = 0.0
-    private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+
+    /// How far one VoiceOver swipe up or down moves the playhead.
+    private let accessibilityStep: TimeInterval = 10
 
     public init(
         currentTime: TimeInterval,
-        duration: TimeInterval,
+        timeline: PlaybackTimeline,
         bufferedTime: TimeInterval,
-        onSeek: @escaping (TimeInterval) -> Void
+        onSeek: @escaping (TimeInterval) -> Void,
+        onEditingChanged: @escaping (Bool) -> Void = { _ in }
     ) {
         self.currentTime = currentTime
-        self.duration = duration
+        self.timeline = timeline
         self.bufferedTime = bufferedTime
         self.onSeek = onSeek
+        self.onEditingChanged = onEditingChanged
     }
 
     private var currentFraction: Double {
-        guard duration > 0 else { return 0.0 }
+        guard timeline.length > 0 else { return 0.0 }
         if isDragging {
             return dragPosition
         }
-        let fraction = currentTime / duration
-        return min(max(fraction, 0.0), 1.0)
+        return timeline.fraction(of: currentTime)
     }
 
     private var bufferedFraction: Double {
-        guard duration > 0 else { return 0.0 }
-        let fraction = bufferedTime / duration
-        return min(max(fraction, 0.0), 1.0)
+        return timeline.fraction(of: bufferedTime)
+    }
+
+    private var accessibilityPositionDescription: String {
+        if timeline.isLive {
+            let behind = timeline.distanceFromLiveEdge(currentTime)
+            return behind > 5 ? "\(MediaItem.formatTime(behind)) behind live" : "Live"
+        }
+        return "\(MediaItem.formatTime(currentTime)) of \(MediaItem.formatTime(timeline.range.upperBound))"
     }
 
     public var body: some View {
@@ -83,23 +94,35 @@ public struct GlassScrubber: View {
                     .onChanged { value in
                         if !isDragging {
                             isDragging = true
-                            impactFeedback.impactOccurred()
+                            onEditingChanged(true)
                         }
                         let clampedX = min(max(0, value.location.x), totalWidth)
-                        let newFraction = totalWidth > 0 ? (clampedX / totalWidth) : 0
-                        dragPosition = newFraction
+                        dragPosition = totalWidth > 0 ? (clampedX / totalWidth) : 0
                     }
                     .onEnded { value in
                         let clampedX = min(max(0, value.location.x), totalWidth)
                         let finalFraction = totalWidth > 0 ? (clampedX / totalWidth) : 0
-                        let targetTime = finalFraction * duration
                         isDragging = false
-                        onSeek(targetTime)
-                        impactFeedback.impactOccurred()
+                        onSeek(timeline.time(atFraction: finalFraction))
+                        onEditingChanged(false)
                     }
             )
             .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.8), value: isDragging)
         }
-        .frame(height: 28)
+        .frame(height: 44)
+        .sensoryFeedback(.impact(weight: .light), trigger: isDragging)
+        .accessibilityElement()
+        .accessibilityLabel("Playback position")
+        .accessibilityValue(accessibilityPositionDescription)
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment:
+                onSeek(timeline.clamp(currentTime + accessibilityStep))
+            case .decrement:
+                onSeek(timeline.clamp(currentTime - accessibilityStep))
+            @unknown default:
+                break
+            }
+        }
     }
 }

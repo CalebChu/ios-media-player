@@ -9,7 +9,7 @@ public struct StreamInputSheet: View {
     @State private var errorMessage: String?
 
     private struct SampleStream: Identifiable, Hashable {
-        let id = UUID()
+        var id: String { url }
         let title: String
         let description: String
         let url: String
@@ -18,7 +18,7 @@ public struct StreamInputSheet: View {
     private let sampleStreams: [SampleStream] = [
         SampleStream(
             title: "Big Buck Bunny (HLS)",
-            description: "Apple standard HLS test stream with multi-bitrate video",
+            description: "Multi-bitrate HLS test stream hosted by Mux",
             url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
         ),
         SampleStream(
@@ -80,6 +80,12 @@ public struct StreamInputSheet: View {
                     .padding(12)
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(12)
+            }
+
+            if let warning = urlWarning {
+                Label(warning, systemImage: "exclamationmark.shield")
+                    .font(.caption)
+                    .foregroundColor(.orange)
             }
 
             if let error = errorMessage {
@@ -148,9 +154,27 @@ public struct StreamInputSheet: View {
         }
     }
 
+    private var trimmedURLString: String {
+        return streamURLString.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Warns about choices that are allowed but worth knowing about before playing.
+    private var urlWarning: String? {
+        guard let url = URL(string: trimmedURLString), let scheme = url.scheme?.lowercased() else { return nil }
+        if url.user != nil || url.password != nil {
+            return "This URL contains a user name or password. It will play, but won't be saved to your library."
+        }
+        if scheme == "http" {
+            return "This stream isn't encrypted. Others on your network could see or alter it."
+        }
+        return nil
+    }
+
     private func validateAndPlayCustomStream() {
-        guard let url = URL(string: streamURLString.trimmingCharacters(in: .whitespacesAndNewlines)),
-              url.scheme == "http" || url.scheme == "https" else {
+        guard let url = URL(string: trimmedURLString),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https",
+              url.host != nil else {
             errorMessage = "Please enter a valid HTTP or HTTPS stream URL."
             return
         }
