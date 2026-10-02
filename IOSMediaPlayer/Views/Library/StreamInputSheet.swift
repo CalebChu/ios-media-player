@@ -19,7 +19,7 @@ public struct StreamInputSheet: View {
         SampleStream(
             title: "Big Buck Bunny (HLS)",
             description: "Apple standard HLS test stream with multi-bitrate video",
-            url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
         ),
         SampleStream(
             title: "Elephants Dream (Direct MP4)",
