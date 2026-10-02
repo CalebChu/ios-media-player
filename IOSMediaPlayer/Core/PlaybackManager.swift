@@ -30,6 +30,7 @@ public final class PlaybackManager: ObservableObject {
     private var itemStatusObservation: NSKeyValueObservation?
     private var timeControlStatusObservation: NSKeyValueObservation?
     private var loadedTimeRangesObservation: NSKeyValueObservation?
+    private var seekableTimeRangesObservation: NSKeyValueObservation?
     private var activeSecurityScopedURL: URL?
     private var cancellables = Set<AnyCancellable>()
 
@@ -121,7 +122,23 @@ public final class PlaybackManager: ObservableObject {
     }
 
     public func seek(to time: TimeInterval, completion: (() -> Void)? = nil) {
-        let clampedTime = max(0, min(time, duration))
+        let clampedTime: TimeInterval
+        if let currentItem = player.currentItem,
+           let seekableRange = currentItem.seekableTimeRanges.last?.timeRangeValue {
+            let start = seekableRange.start.seconds
+            let end = seekableRange.start.seconds + seekableRange.duration.seconds
+            if !start.isNaN && !end.isNaN && end >= start {
+                clampedTime = max(start, min(time, end))
+            } else if duration > 0 {
+                clampedTime = max(0, min(time, duration))
+            } else {
+                clampedTime = max(0, time)
+            }
+        } else if duration > 0 {
+            clampedTime = max(0, min(time, duration))
+        } else {
+            clampedTime = max(0, time)
+        }
         currentTime = clampedTime
 
         let cmTime = CMTime(seconds: clampedTime, preferredTimescale: 600)
@@ -180,6 +197,7 @@ public final class PlaybackManager: ObservableObject {
         itemStatusObservation?.invalidate()
         timeControlStatusObservation?.invalidate()
         loadedTimeRangesObservation?.invalidate()
+        seekableTimeRangesObservation?.invalidate()
 
         itemStatusObservation = playerItem.observe(\.status, options: [.new, .initial]) { [weak self] item, _ in
             Task { @MainActor [weak self] in
@@ -189,6 +207,11 @@ public final class PlaybackManager: ObservableObject {
                     let itemDuration = item.duration.seconds
                     if !itemDuration.isNaN && !itemDuration.isInfinite && itemDuration > 0 {
                         self.duration = itemDuration
+                    } else if let range = item.seekableTimeRanges.last?.timeRangeValue {
+                        let end = range.start.seconds + range.duration.seconds
+                        if !end.isNaN && !end.isInfinite && end > 0 {
+                            self.duration = end
+                        }
                     }
 
                     if resumePosition > 0 && resumePosition < self.duration {
@@ -243,6 +266,19 @@ public final class PlaybackManager: ObservableObject {
                 if let timeRange = item.loadedTimeRanges.first?.timeRangeValue {
                     let buffered = timeRange.start.seconds + timeRange.duration.seconds
                     self.bufferedTime = max(0, buffered)
+                }
+            }
+        }
+
+        seekableTimeRangesObservation = playerItem.observe(\.seekableTimeRanges, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                if self.duration == 0, let range = item.seekableTimeRanges.last?.timeRangeValue {
+                    let end = range.start.seconds + range.duration.seconds
+                    if !end.isNaN && !end.isInfinite && end > 0 {
+                        self.duration = end
+                        self.updateNowPlayingMetadata()
+                    }
                 }
             }
         }
