@@ -97,12 +97,14 @@ open IOSMediaPlayer.xcodeproj
 ### In-Player Controls & Gestures
 | Gesture / Action | Result |
 | :--- | :--- |
-| **Swipe Up / Down (Left side)** | Adjust screen brightness |
-| **Swipe Up / Down (Right side)** | Adjust audio volume |
+| **Swipe Down** | Exit video playback (default; disables vertical brightness/volume gestures) |
+| **Swipe Up / Down (Left side)** | Adjust screen brightness (available when Swipe Down to Exit is off) |
+| **Swipe Up / Down (Right side)** | Adjust audio volume (available when Swipe Down to Exit is off) |
 | **Swipe Left / Right** | Scrub / Seek through media |
 | **Double Tap (Left half)** | Skip backward 10 seconds |
 | **Double Tap (Right half)** | Skip forward 10 seconds |
 | **Single Tap** | Show or hide floating player controls |
+| **Gear Button (Toolbar)** | Open Gesture Settings page |
 | **PiP Button (Top Bar)** | Enter Picture-in-Picture floating window |
 | **Speed Button (Bottom Bar)** | Select playback speed (`0.5x` – `2.0x`) |
 | **LIVE Button (Live streams)** | Jump back to the live edge |
@@ -122,7 +124,8 @@ IOSMediaPlayer/
 │   ├── AVAudioSessionManager.swift    # Audio interruptions & route handling
 │   ├── NowPlayingManager.swift        # Lock screen & Control Center integration
 │   ├── PictureInPictureManager.swift  # PiP controller, shared video view & restore flow
-│   └── PlaybackProgressStore.swift    # Library persistence & security-scoped bookmarks
+│   ├── PlaybackProgressStore.swift    # Library persistence & security-scoped bookmarks
+│   └── GestureSettingsStore.swift     # Gesture preference persistence & exclusivity logic
 ├── Models/
 │   ├── MediaItem.swift                # Identifiable media resource model
 │   ├── PlaybackSpeed.swift            # Playback rate options
@@ -131,17 +134,19 @@ IOSMediaPlayer/
 │   ├── Library/
 │   │   ├── LibraryView.swift          # Main screen with shelves & file importer
 │   │   └── StreamInputSheet.swift     # Modal for entering stream URLs
-│   └── Player/
-│       ├── VideoPlayerContainerView.swift # Full-screen player view
-│       ├── AVPlayerLayerView.swift    # Hosts the shared hardware-accelerated video layer
-│       ├── GestureOverlayView.swift   # Gesture recognizers & HUD triggers
-│       ├── PlayerOverlayView.swift    # Liquid glass floating toolbars
-│       └── GlassHUDView.swift         # Glass HUD toasts for volume/brightness/seek
+│   ├── Player/
+│   │   ├── VideoPlayerContainerView.swift # Full-screen player view
+│   │   ├── AVPlayerLayerView.swift    # Hosts the shared hardware-accelerated video layer
+│   │   ├── GestureOverlayView.swift   # Gesture recognizers & HUD triggers
+│   │   ├── PlayerOverlayView.swift    # Liquid glass floating toolbars
+│   │   └── GlassHUDView.swift         # Glass HUD toasts for volume/brightness/seek
+│   └── Settings/
+│       └── SettingsView.swift         # Settings page for toggling gesture controls
 └── Components/
     ├── LiquidGlassModifier.swift      # Native glass on iOS 26, material fallback before
     └── GlassScrubber.swift            # Custom interactive, accessible playback scrubber
 
-IOSMediaPlayerTests/                   # Unit tests for models, store, timeline & playback lifecycle
+IOSMediaPlayerTests/                   # Unit tests for models, store, timeline, settings & playback lifecycle
 ```
 
 ---

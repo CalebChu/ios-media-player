@@ -4,9 +4,11 @@ import UniformTypeIdentifiers
 public struct LibraryView: View {
     @EnvironmentObject private var progressStore: PlaybackProgressStore
     @EnvironmentObject private var playbackManager: PlaybackManager
+    @EnvironmentObject private var settingsStore: GestureSettingsStore
 
     @State private var isShowingFileImporter = false
     @State private var isShowingStreamSheet = false
+    @State private var isShowingSettings = false
     @State private var isPlayerPresented = false
     @State private var pendingStreamPlaybackItem: MediaItem?
     @State private var importErrorMessage: String?
@@ -26,6 +28,14 @@ public struct LibraryView: View {
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("Media Player")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: { isShowingSettings = true }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 18))
+                    }
+                    .accessibilityLabel("Settings")
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button(action: { isShowingFileImporter = true }) {
@@ -52,6 +62,10 @@ public struct LibraryView: View {
                 guard url.isFileURL else { return }
                 handleFileImport(result: .success([url]))
             }
+            .sheet(isPresented: $isShowingSettings) {
+                SettingsView()
+                    .environmentObject(settingsStore)
+            }
             .sheet(isPresented: $isShowingStreamSheet, onDismiss: {
                 if let item = pendingStreamPlaybackItem {
                     pendingStreamPlaybackItem = nil
@@ -73,6 +87,7 @@ public struct LibraryView: View {
             )
             .fullScreenCover(isPresented: $isPlayerPresented) {
                 VideoPlayerContainerView(playbackManager: playbackManager)
+                    .environmentObject(settingsStore)
             }
             .onAppear {
                 // PiP finishes restoring once the player's video view is back on screen.

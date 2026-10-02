@@ -4,12 +4,15 @@ import SwiftUI
 public struct PlayerOverlayView: View {
     @ObservedObject var playbackManager: PlaybackManager
     @ObservedObject var pipManager: PictureInPictureManager
+    @EnvironmentObject private var settingsStore: GestureSettingsStore
     public let onDismiss: () -> Void
     /// Called with `true` while the user is scrubbing or has the speed menu open, and `false` when
     /// they finish, so the container can keep the controls visible meanwhile.
     public let onInteractionChanged: (Bool) -> Void
     /// Called after any tap on a control, so the container can restart its auto-hide timer.
     public let onInteraction: () -> Void
+
+    @State private var isShowingSettings = false
 
     /// Apple's minimum comfortable touch target.
     private let minimumHitSize: CGFloat = 44
@@ -37,6 +40,12 @@ public struct PlayerOverlayView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .transition(.opacity.animation(.easeInOut(duration: 0.25)))
+        .sheet(isPresented: $isShowingSettings, onDismiss: {
+            onInteractionChanged(false)
+        }) {
+            SettingsView()
+                .environmentObject(settingsStore)
+        }
     }
 
     // MARK: - Top bar
@@ -110,6 +119,19 @@ public struct PlayerOverlayView: View {
                 .opacity(canTogglePiP ? 1 : 0.4)
                 .accessibilityLabel(pipManager.isPiPActive ? "Stop Picture in Picture" : "Start Picture in Picture")
             }
+
+            Button(action: {
+                isShowingSettings = true
+                onInteraction()
+                onInteractionChanged(true)
+            }) {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: minimumHitSize, height: minimumHitSize)
+            }
+            .liquidGlassPill(specularOpacity: 0.4, isInteractive: true)
+            .accessibilityLabel("Settings")
         }
     }
 

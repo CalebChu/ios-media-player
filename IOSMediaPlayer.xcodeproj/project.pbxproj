@@ -31,6 +31,9 @@
 		200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000023 /* PlaybackProgressStoreTests.swift */; };
 		200100000000000000000026 /* PlaybackManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000026 /* PlaybackManagerTests.swift */; };
 		200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000025 /* PlaybackTimelineTests.swift */; };
+		200100000000000000000027 /* GestureSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000027 /* GestureSettingsStore.swift */; };
+		200100000000000000000028 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000028 /* SettingsView.swift */; };
+		200100000000000000000029 /* GestureSettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000029 /* GestureSettingsStoreTests.swift */; };
 		200100000000000000000030 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000030 /* AVFoundation.framework */; };
 		200100000000000000000031 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000031 /* AVKit.framework */; };
 		200100000000000000000032 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000032 /* MediaPlayer.framework */; };
@@ -72,6 +75,9 @@
 		100100000000000000000023 /* PlaybackProgressStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackProgressStoreTests.swift; sourceTree = "<group>"; };
 		100100000000000000000026 /* PlaybackManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackManagerTests.swift; sourceTree = "<group>"; };
 		100100000000000000000025 /* PlaybackTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTimelineTests.swift; sourceTree = "<group>"; };
+		100100000000000000000027 /* GestureSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureSettingsStore.swift; sourceTree = "<group>"; };
+		100100000000000000000028 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		100100000000000000000029 /* GestureSettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureSettingsStoreTests.swift; sourceTree = "<group>"; };
 		100100000000000000000030 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		100100000000000000000031 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		100100000000000000000032 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -140,6 +146,7 @@
 				100100000000000000000004 /* NowPlayingManager.swift */,
 				100100000000000000000005 /* PictureInPictureManager.swift */,
 				100100000000000000000006 /* PlaybackProgressStore.swift */,
+				100100000000000000000027 /* GestureSettingsStore.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -159,6 +166,7 @@
 			children = (
 				300100000000000000000007 /* Library */,
 				300100000000000000000008 /* Player */,
+				300100000000000000000012 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -184,6 +192,14 @@
 			path = Player;
 			sourceTree = "<group>";
 		};
+		300100000000000000000012 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				100100000000000000000028 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		300100000000000000000009 /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -201,6 +217,7 @@
 				100100000000000000000023 /* PlaybackProgressStoreTests.swift */,
 				100100000000000000000026 /* PlaybackManagerTests.swift */,
 				100100000000000000000025 /* PlaybackTimelineTests.swift */,
+				100100000000000000000029 /* GestureSettingsStoreTests.swift */,
 			);
 			path = IOSMediaPlayerTests;
 			sourceTree = "<group>";
@@ -341,6 +358,8 @@
 				200100000000000000000015 /* GlassHUDView.swift in Sources */,
 				200100000000000000000016 /* LiquidGlassModifier.swift in Sources */,
 				200100000000000000000018 /* GlassScrubber.swift in Sources */,
+				200100000000000000000027 /* GestureSettingsStore.swift in Sources */,
+				200100000000000000000028 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -353,6 +372,7 @@
 				200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */,
 				200100000000000000000026 /* PlaybackManagerTests.swift in Sources */,
 				200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */,
+				200100000000000000000029 /* GestureSettingsStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

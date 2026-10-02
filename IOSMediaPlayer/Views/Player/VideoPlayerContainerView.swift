@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct VideoPlayerContainerView: View {
     @ObservedObject var playbackManager: PlaybackManager
+    @EnvironmentObject private var settingsStore: GestureSettingsStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var areControlsVisible = true
@@ -9,6 +10,8 @@ public struct VideoPlayerContainerView: View {
     @State private var autoHideTimerTask: Task<Void, Never>?
     /// True while the user is scrubbing or has a control menu open; auto-hide waits until it clears.
     @State private var isInteractingWithControls = false
+    /// Vertical offset driven by the swipe-down-to-exit gesture.
+    @State private var swipeDownOffset: CGFloat = 0
 
     public init(playbackManager: PlaybackManager) {
         self.playbackManager = playbackManager
@@ -28,6 +31,7 @@ public struct VideoPlayerContainerView: View {
             // Gesture detection layer
             GestureOverlayView(
                 playbackManager: playbackManager,
+                settings: settingsStore,
                 onSingleTap: {
                     toggleControls()
                 },
@@ -36,6 +40,21 @@ public struct VideoPlayerContainerView: View {
                         activeHUD = hud
                     }
                     resetAutoHideTimer()
+                },
+                onSwipeDownChanged: { distance in
+                    swipeDownOffset = distance
+                    autoHideTimerTask?.cancel()
+                },
+                onSwipeDownEnded: { shouldDismiss in
+                    if shouldDismiss {
+                        playbackManager.persistCurrentProgress()
+                        dismiss()
+                    } else {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            swipeDownOffset = 0
+                        }
+                        resetAutoHideTimer()
+                    }
                 }
             )
             .ignoresSafeArea()
@@ -108,6 +127,8 @@ public struct VideoPlayerContainerView: View {
                 .zIndex(8)
             }
         }
+        .offset(y: swipeDownOffset)
+        .opacity(swipeDownOffset > 0 ? max(0.4, 1.0 - Double(swipeDownOffset / 500.0)) : 1.0)
         .statusBarHidden(!areControlsVisible)
         .onAppear {
             scheduleAutoHideTimer()

@@ -4,8 +4,11 @@ import UIKit
 
 public struct GestureOverlayView: View {
     @ObservedObject var playbackManager: PlaybackManager
+    @ObservedObject var settings: GestureSettingsStore
     public let onSingleTap: () -> Void
     public let onHUDUpdate: (HUDType?) -> Void
+    public let onSwipeDownChanged: ((CGFloat) -> Void)?
+    public let onSwipeDownEnded: ((Bool) -> Void)?
 
     @State private var dragDirection: DragDirection = .none
     @State private var initialBrightness: CGFloat = 0.5
@@ -22,16 +25,23 @@ public struct GestureOverlayView: View {
         case verticalLeft
         case verticalRight
         case horizontal
+        case swipeDown
     }
 
     public init(
         playbackManager: PlaybackManager,
+        settings: GestureSettingsStore = .shared,
         onSingleTap: @escaping () -> Void,
-        onHUDUpdate: @escaping (HUDType?) -> Void
+        onHUDUpdate: @escaping (HUDType?) -> Void,
+        onSwipeDownChanged: ((CGFloat) -> Void)? = nil,
+        onSwipeDownEnded: ((Bool) -> Void)? = nil
     ) {
         self.playbackManager = playbackManager
+        self.settings = settings
         self.onSingleTap = onSingleTap
         self.onHUDUpdate = onHUDUpdate
+        self.onSwipeDownChanged = onSwipeDownChanged
+        self.onSwipeDownEnded = onSwipeDownEnded
     }
 
     public var body: some View {
@@ -46,6 +56,7 @@ public struct GestureOverlayView: View {
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture(count: 2, coordinateSpace: .local) { location in
+                        guard settings.isDoubleTapToSkipEnabled else { return }
                         let interval = NowPlayingManager.skipInterval
                         let startTime = playbackManager.currentTime
                         if location.x < (geometry.size.width / 2.0) {
@@ -59,6 +70,7 @@ public struct GestureOverlayView: View {
                         scheduleHUDDismiss()
                     }
                     .onTapGesture(count: 1) {
+                        guard settings.isSingleTapToToggleControlsEnabled else { return }
                         onSingleTap()
                     }
             }
@@ -96,21 +108,40 @@ public struct GestureOverlayView: View {
             hudDismissTask?.cancel()
             let isHorizontal = abs(translation.width) > abs(translation.height)
             if isHorizontal {
-                dragDirection = .horizontal
-                initialSeekTime = playbackManager.currentTime
-            } else if startLocation.x < (size.width / 2.0) {
-                dragDirection = .verticalLeft
-                initialBrightness = currentScreen?.brightness ?? 0.5
-                if brightnessToRestore == nil {
-                    brightnessToRestore = initialBrightness
+                if settings.isSeekGestureEnabled {
+                    dragDirection = .horizontal
+                    initialSeekTime = playbackManager.currentTime
+                }
+            } else if settings.isSwipeDownToExitEnabled {
+                // Swipe down to exit takes precedence over vertical gestures.
+                // Vertical gestures for brightness and volume are disallowed.
+                if translation.height > 0 {
+                    dragDirection = .swipeDown
                 }
             } else {
-                dragDirection = .verticalRight
-                initialVolume = volumeSlider?.value ?? AVAudioSession.sharedInstance().outputVolume
+                // Swipe down to exit is OFF: vertical brightness and volume are allowed.
+                if startLocation.x < (size.width / 2.0) {
+                    if settings.effectiveBrightnessGestureEnabled {
+                        dragDirection = .verticalLeft
+                        initialBrightness = currentScreen?.brightness ?? 0.5
+                        if brightnessToRestore == nil {
+                            brightnessToRestore = initialBrightness
+                        }
+                    }
+                } else {
+                    if settings.effectiveVolumeGestureEnabled {
+                        dragDirection = .verticalRight
+                        initialVolume = volumeSlider?.value ?? AVAudioSession.sharedInstance().outputVolume
+                    }
+                }
             }
         }
 
         switch dragDirection {
+        case .swipeDown:
+            let pullDistance = max(0, translation.height)
+            onSwipeDownChanged?(pullDistance)
+
         case .verticalLeft:
             let delta = -translation.height / (size.height * 0.75)
             let newBrightness = min(max(initialBrightness + delta, 0.0), 1.0)
@@ -137,13 +168,26 @@ public struct GestureOverlayView: View {
     }
 
     private func handleDragEnded(value: DragGesture.Value) {
-        if dragDirection == .horizontal {
+        switch dragDirection {
+        case .swipeDown:
+            let translationY = value.translation.height
+            let predictedY = value.predictedEndTranslation.height
+            let shouldDismiss = translationY > 80 || (predictedY - translationY) > 120
+            onSwipeDownEnded?(shouldDismiss)
+
+        case .horizontal:
             let targetTime = playbackManager.timeline.clamp(initialSeekTime + currentSeekDelta)
             playbackManager.seek(to: targetTime)
+            scheduleHUDDismiss()
+
+        case .verticalLeft, .verticalRight:
+            scheduleHUDDismiss()
+
+        case .none:
+            break
         }
 
         dragDirection = .none
-        scheduleHUDDismiss()
     }
 
     private func setSystemVolume(_ volume: Float) {

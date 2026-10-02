@@ -2,9 +2,10 @@ import SwiftUI
 
 @main
 struct IOSMediaPlayerApp: App {
-    // Both are app-lifetime singletons, so they are injected rather than owned with @StateObject.
+    // App-lifetime singletons, injected rather than owned with @StateObject.
     private let playbackManager = PlaybackManager.shared
     private let progressStore = PlaybackProgressStore.shared
+    private let settingsStore = GestureSettingsStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -16,6 +17,7 @@ struct IOSMediaPlayerApp: App {
             LibraryView()
                 .environmentObject(playbackManager)
                 .environmentObject(progressStore)
+                .environmentObject(settingsStore)
                 .preferredColorScheme(.dark)
         }
         .onChange(of: scenePhase) { _, phase in
