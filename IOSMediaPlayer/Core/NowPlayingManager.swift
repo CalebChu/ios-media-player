@@ -90,6 +90,7 @@ public final class NowPlayingManager {
         title: String,
         artist: String? = nil,
         duration: TimeInterval,
+        isLiveStream: Bool = false,
         elapsed: TimeInterval,
         rate: Float
     ) {
@@ -97,14 +98,15 @@ public final class NowPlayingManager {
             MPMediaItemPropertyTitle: title,
             MPNowPlayingInfoPropertyPlaybackRate: Double(rate),
             MPNowPlayingInfoPropertyDefaultPlaybackRate: 1.0,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: elapsed
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: elapsed,
+            MPNowPlayingInfoPropertyIsLiveStream: isLiveStream
         ]
 
         if let artist = artist, !artist.isEmpty {
             info[MPMediaItemPropertyArtist] = artist
         }
 
-        if duration > 0 && !duration.isNaN && !duration.isInfinite {
+        if !isLiveStream && duration > 0 && duration.isFinite {
             info[MPMediaItemPropertyPlaybackDuration] = duration
         }
 

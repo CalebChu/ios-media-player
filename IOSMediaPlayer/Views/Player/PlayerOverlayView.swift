@@ -91,26 +91,15 @@ public struct PlayerOverlayView: View {
             VStack(spacing: 4) {
                 GlassScrubber(
                     currentTime: playbackManager.currentTime,
-                    duration: playbackManager.duration,
+                    timeline: playbackManager.timeline,
                     bufferedTime: playbackManager.bufferedTime,
                     onSeek: { time in
                         playbackManager.seek(to: time)
                     }
                 )
 
-                HStack {
-                    Text(MediaItem.formatTime(playbackManager.currentTime))
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.85))
-
-                    Spacer()
-
-                    let remaining = max(0, playbackManager.duration - playbackManager.currentTime)
-                    Text("-" + MediaItem.formatTime(remaining))
-                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.85))
-                }
-                .padding(.horizontal, 4)
+                timeLabels
+                    .padding(.horizontal, 4)
             }
 
             // Transport Controls
@@ -125,6 +114,46 @@ public struct PlayerOverlayView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .liquidGlass(cornerRadius: 28, specularOpacity: 0.4)
+    }
+
+    @ViewBuilder
+    private var timeLabels: some View {
+        if playbackManager.isLive {
+            let behindLive = playbackManager.timeline.distanceFromLiveEdge(playbackManager.currentTime)
+            HStack {
+                Text(behindLive > 5 ? "-" + MediaItem.formatTime(behindLive) : "")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.85))
+
+                Spacer()
+
+                Button(action: { playbackManager.seekToLiveEdge() }) {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(behindLive > 5 ? Color.white.opacity(0.5) : Color.red)
+                            .frame(width: 6, height: 6)
+                        Text("LIVE")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                }
+                .disabled(behindLive <= 5)
+                .accessibilityLabel(behindLive > 5 ? "Jump to live" : "Live")
+            }
+        } else {
+            HStack {
+                Text(MediaItem.formatTime(playbackManager.currentTime))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.85))
+
+                Spacer()
+
+                let remaining = max(0, playbackManager.duration - playbackManager.currentTime)
+                Text("-" + MediaItem.formatTime(remaining))
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.white.opacity(0.85))
+            }
+        }
     }
 
     @ViewBuilder

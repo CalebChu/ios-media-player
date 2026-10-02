@@ -100,9 +100,10 @@ public struct GestureOverlayView: View {
             onHUDUpdate(.volume(newVolume))
 
         case .horizontal:
-            let factor: Double = playbackManager.duration > 300 ? 120 : 60
+            let timeline = playbackManager.timeline
+            let factor: Double = timeline.length > 300 ? 120 : 60
             let deltaSeconds = Double(translation.width / size.width) * factor
-            let targetTime = min(max(0, initialSeekTime + deltaSeconds), playbackManager.duration)
+            let targetTime = timeline.clamp(initialSeekTime + deltaSeconds)
             currentSeekDelta = targetTime - initialSeekTime
             onHUDUpdate(.seek(targetTime: targetTime, delta: currentSeekDelta))
 
@@ -113,7 +114,7 @@ public struct GestureOverlayView: View {
 
     private func handleDragEnded(value: DragGesture.Value) {
         if dragDirection == .horizontal {
-            let targetTime = min(max(0, initialSeekTime + currentSeekDelta), playbackManager.duration)
+            let targetTime = playbackManager.timeline.clamp(initialSeekTime + currentSeekDelta)
             playbackManager.seek(to: targetTime)
         }
 

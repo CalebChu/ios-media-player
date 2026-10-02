@@ -15,6 +15,7 @@
 		200100000000000000000006 /* PlaybackProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000006 /* PlaybackProgressStore.swift */; };
 		200100000000000000000007 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000007 /* MediaItem.swift */; };
 		200100000000000000000008 /* PlaybackSpeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000008 /* PlaybackSpeed.swift */; };
+		200100000000000000000024 /* PlaybackTimeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000024 /* PlaybackTimeline.swift */; };
 		200100000000000000000009 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000009 /* LibraryView.swift */; };
 		200100000000000000000010 /* StreamInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000010 /* StreamInputSheet.swift */; };
 		200100000000000000000011 /* VideoPlayerContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000011 /* VideoPlayerContainerView.swift */; };
@@ -53,6 +54,7 @@
 		100100000000000000000006 /* PlaybackProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackProgressStore.swift; sourceTree = "<group>"; };
 		100100000000000000000007 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
 		100100000000000000000008 /* PlaybackSpeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSpeed.swift; sourceTree = "<group>"; };
+		100100000000000000000024 /* PlaybackTimeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTimeline.swift; sourceTree = "<group>"; };
 		100100000000000000000009 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		100100000000000000000010 /* StreamInputSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamInputSheet.swift; sourceTree = "<group>"; };
 		100100000000000000000011 /* VideoPlayerContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerContainerView.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			children = (
 				100100000000000000000007 /* MediaItem.swift */,
 				100100000000000000000008 /* PlaybackSpeed.swift */,
+				100100000000000000000024 /* PlaybackTimeline.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				200100000000000000000006 /* PlaybackProgressStore.swift in Sources */,
 				200100000000000000000007 /* MediaItem.swift in Sources */,
 				200100000000000000000008 /* PlaybackSpeed.swift in Sources */,
+				200100000000000000000024 /* PlaybackTimeline.swift in Sources */,
 				200100000000000000000009 /* LibraryView.swift in Sources */,
 				200100000000000000000010 /* StreamInputSheet.swift in Sources */,
 				200100000000000000000011 /* VideoPlayerContainerView.swift in Sources */,

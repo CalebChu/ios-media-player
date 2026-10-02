@@ -2,7 +2,7 @@ import SwiftUI
 
 public struct GlassScrubber: View {
     public let currentTime: TimeInterval
-    public let duration: TimeInterval
+    public let timeline: PlaybackTimeline
     public let bufferedTime: TimeInterval
     public let onSeek: (TimeInterval) -> Void
 
@@ -12,29 +12,26 @@ public struct GlassScrubber: View {
 
     public init(
         currentTime: TimeInterval,
-        duration: TimeInterval,
+        timeline: PlaybackTimeline,
         bufferedTime: TimeInterval,
         onSeek: @escaping (TimeInterval) -> Void
     ) {
         self.currentTime = currentTime
-        self.duration = duration
+        self.timeline = timeline
         self.bufferedTime = bufferedTime
         self.onSeek = onSeek
     }
 
     private var currentFraction: Double {
-        guard duration > 0 else { return 0.0 }
+        guard timeline.length > 0 else { return 0.0 }
         if isDragging {
             return dragPosition
         }
-        let fraction = currentTime / duration
-        return min(max(fraction, 0.0), 1.0)
+        return timeline.fraction(of: currentTime)
     }
 
     private var bufferedFraction: Double {
-        guard duration > 0 else { return 0.0 }
-        let fraction = bufferedTime / duration
-        return min(max(fraction, 0.0), 1.0)
+        return timeline.fraction(of: bufferedTime)
     }
 
     public var body: some View {
@@ -92,7 +89,7 @@ public struct GlassScrubber: View {
                     .onEnded { value in
                         let clampedX = min(max(0, value.location.x), totalWidth)
                         let finalFraction = totalWidth > 0 ? (clampedX / totalWidth) : 0
-                        let targetTime = finalFraction * duration
+                        let targetTime = timeline.time(atFraction: finalFraction)
                         isDragging = false
                         onSeek(targetTime)
                         impactFeedback.impactOccurred()

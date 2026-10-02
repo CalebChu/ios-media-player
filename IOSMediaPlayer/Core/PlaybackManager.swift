@@ -19,7 +19,9 @@ public final class PlaybackManager: ObservableObject {
     @Published public private(set) var currentMediaItem: MediaItem?
     @Published public private(set) var playbackState: PlaybackState = .idle
     @Published public private(set) var currentTime: TimeInterval = 0
+    /// Length of finite media. Zero for live streams; use `timeline` for anything seek- or scrubber-related.
     @Published public private(set) var duration: TimeInterval = 0
+    @Published public private(set) var timeline: PlaybackTimeline = .empty
     @Published public private(set) var bufferedTime: TimeInterval = 0
     @Published public private(set) var playbackSpeed: PlaybackSpeed = .normal
     @Published public var videoGravity: AVLayerVideoGravity = .resizeAspect
@@ -68,6 +70,10 @@ public final class PlaybackManager: ObservableObject {
         return wantsToPlay && !isInterrupted
     }
 
+    public var isLive: Bool {
+        return timeline.isLive
+    }
+
     public var isFailed: Bool {
         if case .failed = playbackState { return true }
         return false
@@ -89,6 +95,7 @@ public final class PlaybackManager: ObservableObject {
         playbackState = .loading
         currentTime = resumePosition
         duration = item.duration
+        timeline = .finite(duration: item.duration)
         bufferedTime = 0
 
         let targetURL: URL
@@ -181,6 +188,11 @@ public final class PlaybackManager: ObservableObject {
         seek(to: currentTime - seconds)
     }
 
+    public func seekToLiveEdge() {
+        guard isLive else { return }
+        seek(to: timeline.range.upperBound)
+    }
+
     public func setPlaybackSpeed(_ speed: PlaybackSpeed) {
         playbackSpeed = speed
         player.defaultRate = speed.rate
@@ -212,13 +224,15 @@ public final class PlaybackManager: ObservableObject {
         playbackState = .idle
         currentTime = 0
         duration = 0
+        timeline = .empty
         bufferedTime = 0
         NowPlayingManager.shared.clearNowPlaying()
         AVAudioSessionManager.shared.deactivateAudioSession()
     }
 
     public func persistCurrentProgress() {
-        guard let item = currentMediaItem, currentTime > 0 else { return }
+        // A live position is a point in a moving window, not progress through the item.
+        guard let item = currentMediaItem, !isLive, currentTime > 0 else { return }
         PlaybackProgressStore.shared.updateProgress(for: item.id, position: currentTime, duration: duration)
     }
 
@@ -243,6 +257,12 @@ public final class PlaybackManager: ObservableObject {
                     guard let self, self.isCurrent(item, generation: generation) else { return }
                     self.updateBufferedTime(from: item)
                 }
+            },
+            playerItem.observe(\.seekableTimeRanges, options: [.new]) { [weak self] item, _ in
+                Task { @MainActor [weak self] in
+                    guard let self, self.isCurrent(item, generation: generation) else { return }
+                    self.updateLiveTimeline(from: item)
+                }
             }
         ]
     }
@@ -256,12 +276,19 @@ public final class PlaybackManager: ObservableObject {
         switch item.status {
         case .readyToPlay:
             guard isPreparingItem else { return }
-            let itemDuration = item.duration.seconds
-            if itemDuration.isFinite && itemDuration > 0 {
-                duration = itemDuration
+            if item.duration.isIndefinite {
+                duration = 0
+                timeline = PlaybackTimeline(range: currentTime...currentTime, isLive: true)
+                updateLiveTimeline(from: item)
+            } else {
+                let itemDuration = item.duration.seconds
+                if itemDuration.isFinite && itemDuration > 0 {
+                    duration = itemDuration
+                }
+                timeline = .finite(duration: duration)
             }
 
-            if resumePosition > 0 && resumePosition < duration {
+            if !isLive && resumePosition > 0 && resumePosition < duration {
                 // The completion runs even if the seek is superseded, so preparation always finishes.
                 seek(to: resumePosition) { [weak self] in
                     self?.finishPreparingItem()
@@ -310,10 +337,23 @@ public final class PlaybackManager: ObservableObject {
 
     private func clampedSeekTime(_ time: TimeInterval) -> TimeInterval {
         guard time.isFinite else { return currentTime }
-        if duration > 0 {
-            return min(max(time, 0), duration)
+        if timeline.length > 0 {
+            return timeline.clamp(time)
         }
         return max(0, time)
+    }
+
+    /// Live windows move forward as the playlist refreshes, so the timeline follows every update.
+    private func updateLiveTimeline(from item: AVPlayerItem) {
+        guard isLive,
+              let range = item.seekableTimeRanges.last?.timeRangeValue else { return }
+        let start = range.start.seconds
+        let end = range.end.seconds
+        guard start.isFinite, end.isFinite, end >= start else { return }
+        let updated = PlaybackTimeline(range: start...end, isLive: true)
+        if updated != timeline {
+            timeline = updated
+        }
     }
 
     private func updateBufferedTime(from item: AVPlayerItem) {
@@ -491,6 +531,7 @@ public final class PlaybackManager: ObservableObject {
             title: item.title,
             artist: item.artist,
             duration: duration,
+            isLiveStream: isLive,
             elapsed: nowPlayingElapsedTime,
             rate: nowPlayingRate
         )
