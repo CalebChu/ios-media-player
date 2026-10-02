@@ -47,7 +47,7 @@ public final class PlaybackManager: ObservableObject {
     }
 
     public var isPlaying: Bool {
-        return playbackState == .playing
+        return player.timeControlStatus != .paused
     }
 
     public var progressFraction: Double {
