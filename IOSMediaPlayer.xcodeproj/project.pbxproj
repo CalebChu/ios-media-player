@@ -30,6 +30,8 @@
 		200100000000000000000021 /* MediaItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000021 /* MediaItemTests.swift */; };
 		200100000000000000000022 /* PlaybackSpeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000022 /* PlaybackSpeedTests.swift */; };
 		200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000023 /* PlaybackProgressStoreTests.swift */; };
+		200100000000000000000026 /* PlaybackManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000026 /* PlaybackManagerTests.swift */; };
+		200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100100000000000000000025 /* PlaybackTimelineTests.swift */; };
 		200100000000000000000030 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000030 /* AVFoundation.framework */; };
 		200100000000000000000031 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000031 /* AVKit.framework */; };
 		200100000000000000000032 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 100100000000000000000032 /* MediaPlayer.framework */; };
@@ -70,6 +72,8 @@
 		100100000000000000000021 /* MediaItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItemTests.swift; sourceTree = "<group>"; };
 		100100000000000000000022 /* PlaybackSpeedTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackSpeedTests.swift; sourceTree = "<group>"; };
 		100100000000000000000023 /* PlaybackProgressStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackProgressStoreTests.swift; sourceTree = "<group>"; };
+		100100000000000000000026 /* PlaybackManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackManagerTests.swift; sourceTree = "<group>"; };
+		100100000000000000000025 /* PlaybackTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackTimelineTests.swift; sourceTree = "<group>"; };
 		100100000000000000000030 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		100100000000000000000031 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		100100000000000000000032 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -198,6 +202,8 @@
 				100100000000000000000021 /* MediaItemTests.swift */,
 				100100000000000000000022 /* PlaybackSpeedTests.swift */,
 				100100000000000000000023 /* PlaybackProgressStoreTests.swift */,
+				100100000000000000000026 /* PlaybackManagerTests.swift */,
+				100100000000000000000025 /* PlaybackTimelineTests.swift */,
 			);
 			path = IOSMediaPlayerTests;
 			sourceTree = "<group>";
@@ -349,6 +355,8 @@
 				200100000000000000000021 /* MediaItemTests.swift in Sources */,
 				200100000000000000000022 /* PlaybackSpeedTests.swift in Sources */,
 				200100000000000000000023 /* PlaybackProgressStoreTests.swift in Sources */,
+				200100000000000000000026 /* PlaybackManagerTests.swift in Sources */,
+				200100000000000000000025 /* PlaybackTimelineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -497,7 +497,7 @@ public final class PlaybackManager: ObservableObject {
         }
     }
 
-    private func handleInterruptionBegan() {
+    func handleInterruptionBegan() {
         guard currentMediaItem != nil else { return }
         // Keep `wantsToPlay` untouched: it records whether the user was playing before the
         // interruption. AVPlayer has usually paused itself by now, so its state can't tell us.
@@ -507,7 +507,7 @@ public final class PlaybackManager: ObservableObject {
         updateNowPlayingPlaybackState()
     }
 
-    private func handleInterruptionEnded(shouldResume: Bool) {
+    func handleInterruptionEnded(shouldResume: Bool) {
         guard isInterrupted else { return }
         isInterrupted = false
         if shouldResume {
