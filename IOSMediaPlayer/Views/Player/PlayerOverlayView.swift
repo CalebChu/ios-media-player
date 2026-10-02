@@ -23,6 +23,7 @@ public struct PlayerOverlayView: View {
     }
 
     // Top Floating Toolbar
+    @ViewBuilder
     private var topBar: some View {
         if #available(iOS 26, *) {
             GlassEffectContainer {

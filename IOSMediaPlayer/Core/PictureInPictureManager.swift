@@ -66,7 +66,7 @@ public final class PictureInPictureManager: NSObject, ObservableObject {
     }
 }
 
-extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
+@preconcurrency extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
     public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         isPiPActive = true
     }
