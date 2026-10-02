@@ -94,6 +94,11 @@ public final class PlaybackManager: ObservableObject {
     }
 
     public func play() {
+        guard let currentItem = player.currentItem,
+              currentItem.status != .failed,
+              player.error == nil else { return }
+        if case .failed = playbackState { return }
+
         AVAudioSessionManager.shared.activateAudioSession()
         player.rate = playbackSpeed.rate
         playbackState = .playing
