@@ -53,6 +53,12 @@ public struct LibraryView: View {
             .fullScreenCover(isPresented: $isPlayerPresented) {
                 VideoPlayerContainerView(playbackManager: playbackManager)
             }
+            .onAppear {
+                PictureInPictureManager.shared.onRestoreUserInterface = { completionHandler in
+                    isPlayerPresented = true
+                    completionHandler(true)
+                }
+            }
         }
     }
 
