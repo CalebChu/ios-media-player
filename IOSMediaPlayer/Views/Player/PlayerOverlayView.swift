@@ -73,6 +73,7 @@ public struct PlayerOverlayView: View {
 
             // Picture-in-Picture Button
             if pipManager.isPiPSupported {
+                let canTogglePiP = pipManager.isPiPPossible || pipManager.isPiPActive
                 Button(action: { pipManager.togglePiP() }) {
                     Image(systemName: pipManager.isPiPActive ? "pip.exit" : "pip.enter")
                         .font(.system(size: 15, weight: .semibold))
@@ -80,6 +81,8 @@ public struct PlayerOverlayView: View {
                         .frame(width: 38, height: 38)
                 }
                 .liquidGlassPill(specularOpacity: 0.4)
+                .disabled(!canTogglePiP)
+                .opacity(canTogglePiP ? 1 : 0.4)
             }
         }
     }

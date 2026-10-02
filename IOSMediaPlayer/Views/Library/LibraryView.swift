@@ -60,9 +60,9 @@ public struct LibraryView: View {
                 VideoPlayerContainerView(playbackManager: playbackManager)
             }
             .onAppear {
-                PictureInPictureManager.shared.onRestoreUserInterface = { completionHandler in
+                // PiP finishes restoring once the player's video view is back on screen.
+                PictureInPictureManager.shared.onRestoreUserInterface = {
                     isPlayerPresented = true
-                    completionHandler(true)
                 }
             }
         }
