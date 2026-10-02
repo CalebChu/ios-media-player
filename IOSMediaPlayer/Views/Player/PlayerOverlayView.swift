@@ -122,70 +122,127 @@ public struct PlayerOverlayView: View {
                 transportControls
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .liquidGlass(cornerRadius: 28, specularOpacity: 0.4)
     }
 
+    @ViewBuilder
     private var transportControls: some View {
-        HStack(spacing: 28) {
-            // Playback Speed Menu
-            Menu {
-                ForEach(PlaybackSpeed.allCases) { speed in
-                    Button(action: { playbackManager.setPlaybackSpeed(speed) }) {
-                        HStack {
-                            Text(speed.title)
-                            if playbackManager.playbackSpeed == speed {
-                                Image(systemName: "checkmark")
-                            }
+        ViewThatFits(in: .horizontal) {
+            // 1. Standard layout (generous spacing for normal portrait & landscape)
+            transportControlsRow(spacing: 18, playSize: 62, playIconSize: 26, skipSize: 42, skipIconSize: 20)
+
+            // 2. Adaptive compact row (for narrow screens like iPhone SE / mini)
+            transportControlsRow(spacing: 10, playSize: 52, playIconSize: 22, skipSize: 36, skipIconSize: 18)
+
+            // 3. Compact two-tier arrangement (for extreme narrow widths or large Dynamic Type)
+            compactTwoTierControls
+        }
+    }
+
+    @ViewBuilder
+    private func transportControlsRow(
+        spacing: CGFloat,
+        playSize: CGFloat,
+        playIconSize: CGFloat,
+        skipSize: CGFloat,
+        skipIconSize: CGFloat
+    ) -> some View {
+        HStack(spacing: 0) {
+            speedMenuButton
+
+            Spacer(minLength: 8)
+
+            HStack(spacing: spacing) {
+                skipBackwardButton(size: skipSize, iconSize: skipIconSize)
+                playPauseButton(size: playSize, iconSize: playIconSize)
+                skipForwardButton(size: skipSize, iconSize: skipIconSize)
+            }
+
+            Spacer(minLength: 8)
+
+            resetButton
+        }
+    }
+
+    @ViewBuilder
+    private var compactTwoTierControls: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 16) {
+                skipBackwardButton(size: 40, iconSize: 20)
+                playPauseButton(size: 56, iconSize: 24)
+                skipForwardButton(size: 40, iconSize: 20)
+            }
+
+            HStack {
+                speedMenuButton
+                Spacer()
+                resetButton
+            }
+        }
+    }
+
+    private var speedMenuButton: some View {
+        Menu {
+            ForEach(PlaybackSpeed.allCases) { speed in
+                Button(action: { playbackManager.setPlaybackSpeed(speed) }) {
+                    HStack {
+                        Text(speed.title)
+                        if playbackManager.playbackSpeed == speed {
+                            Image(systemName: "checkmark")
                         }
                     }
                 }
-            } label: {
-                Text(playbackManager.playbackSpeed.title)
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .frame(minWidth: 44, minHeight: 34)
             }
-            .liquidGlassPill(specularOpacity: 0.35)
-
-            Spacer()
-
-            // Skip Backward
-            Button(action: { playbackManager.skipBackward(seconds: 10) }) {
-                Image(systemName: "gobackward.10")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-            }
-
-            // Play / Pause
-            Button(action: { playbackManager.togglePlayPause() }) {
-                Image(systemName: playbackManager.isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 64, height: 64)
-            }
-            .liquidGlassPill(specularOpacity: 0.5)
-
-            // Skip Forward
-            Button(action: { playbackManager.skipForward(seconds: 10) }) {
-                Image(systemName: "goforward.10")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-            }
-
-            Spacer()
-
-            // Stop / Reset Button
-            Button(action: { playbackManager.seek(to: 0) }) {
-                Image(systemName: "backward.end.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(minWidth: 44, minHeight: 34)
-            }
-            .liquidGlassPill(specularOpacity: 0.35)
+        } label: {
+            Text(playbackManager.playbackSpeed.title)
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .frame(minWidth: 42, minHeight: 32)
         }
+        .liquidGlassPill(specularOpacity: 0.35)
+    }
+
+    private func skipBackwardButton(size: CGFloat, iconSize: CGFloat) -> some View {
+        Button(action: { playbackManager.skipBackward(seconds: 10) }) {
+            Image(systemName: "gobackward.10")
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: size, height: size)
+        }
+        .accessibilityLabel("Skip backward 10 seconds")
+    }
+
+    private func playPauseButton(size: CGFloat, iconSize: CGFloat) -> some View {
+        Button(action: { playbackManager.togglePlayPause() }) {
+            Image(systemName: playbackManager.isPlaying ? "pause.fill" : "play.fill")
+                .font(.system(size: iconSize, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: size, height: size)
+        }
+        .liquidGlassPill(specularOpacity: 0.5)
+        .accessibilityLabel(playbackManager.isPlaying ? "Pause" : "Play")
+    }
+
+    private func skipForwardButton(size: CGFloat, iconSize: CGFloat) -> some View {
+        Button(action: { playbackManager.skipForward(seconds: 10) }) {
+            Image(systemName: "goforward.10")
+                .font(.system(size: iconSize, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: size, height: size)
+        }
+        .accessibilityLabel("Skip forward 10 seconds")
+    }
+
+    private var resetButton: some View {
+        Button(action: { playbackManager.seek(to: 0) }) {
+            Image(systemName: "backward.end.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(minWidth: 42, minHeight: 32)
+        }
+        .liquidGlassPill(specularOpacity: 0.35)
+        .accessibilityLabel("Restart from beginning")
     }
 }
