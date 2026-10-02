@@ -26,9 +26,9 @@
 - **Continue Watching Shelf**: Quickly resume partially watched videos and podcasts with progress indicator rings.
 
 ### 🫧 Liquid Glass Aesthetic
-- **Frosted Translucency**: Layered SwiftUI `.ultraThinMaterial` surfaces that respond dynamically to video colors and ambient light.
-- **Specular Border Highlights**: Subtle chromatic linear gradient strokes mimicking real-world glass reflections.
-- **Floating Pill Toolbars**: Ergonomic floating control bars designed for single-handed use on modern OLED displays and Dynamic Island devices.
+- **Frosted Translucency**: Native Liquid Glass (`.glassEffect()`) on iOS 26 that adapts dynamically to underlying video and ambient lighting, with layered SwiftUI `.ultraThinMaterial` fallback for iOS 17–18.
+- **Specular Border Highlights**: Subtle chromatic linear gradient strokes mimicking real-world glass reflections on fallback platforms, while native glass renders dynamic edge lighting.
+- **Floating Pill Toolbars & Containers**: Ergonomic floating control bars grouped in `GlassEffectContainer` for unified glass blending and single-handed use on modern OLED displays and Dynamic Island devices.
 
 ---
 
