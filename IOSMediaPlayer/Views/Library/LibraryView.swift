@@ -156,38 +156,60 @@ public struct LibraryView: View {
     }
 
     // Quick Actions
+    @ViewBuilder
     private var quickActionsSection: some View {
-        HStack(spacing: 14) {
-            Button(action: { isShowingFileImporter = true }) {
-                HStack {
-                    Image(systemName: "folder.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(.white)
-                    Text("Import Files")
+        if #available(iOS 26, *) {
+            HStack(spacing: 14) {
+                Button(action: { isShowingFileImporter = true }) {
+                    Label("Import Files", systemImage: "folder.fill")
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.accentColor)
-                .cornerRadius(14)
-            }
+                .buttonStyle(.glassProminent)
 
-            Button(action: { isShowingStreamSheet = true }) {
-                HStack {
-                    Image(systemName: "link")
-                        .font(.system(size: 18))
-                    Text("Stream URL")
+                Button(action: { isShowingStreamSheet = true }) {
+                    Label("Stream URL", systemImage: "link")
                         .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .foregroundColor(.primary)
-                .background(Color(.secondarySystemGroupedBackground))
-                .cornerRadius(14)
+                .buttonStyle(.glass)
             }
+            .padding(.horizontal, 20)
+        } else {
+            HStack(spacing: 14) {
+                Button(action: { isShowingFileImporter = true }) {
+                    HStack {
+                        Image(systemName: "folder.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(.white)
+                        Text("Import Files")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.accentColor)
+                    .cornerRadius(14)
+                }
+
+                Button(action: { isShowingStreamSheet = true }) {
+                    HStack {
+                        Image(systemName: "link")
+                            .font(.system(size: 18))
+                        Text("Stream URL")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .foregroundColor(.primary)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .cornerRadius(14)
+                }
+            }
+            .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
     }
 
     // Media List Section
