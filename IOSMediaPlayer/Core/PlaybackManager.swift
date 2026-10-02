@@ -5,7 +5,7 @@ import UIKit
 
 @MainActor
 public final class PlaybackManager: ObservableObject {
-    public static let shared = PlaybackManager()
+    public static let shared = PlaybackManager(progressStore: .shared)
 
     public enum PlaybackState: Equatable {
         case idle
@@ -34,6 +34,11 @@ public final class PlaybackManager: ObservableObject {
 
     public let player = AVPlayer()
 
+    /// How often progress is saved during continuous playback, so a crash or force-quit loses little.
+    static let checkpointInterval: TimeInterval = 15
+
+    private let progressStore: PlaybackProgressStore
+
     nonisolated(unsafe) private var timeObserverToken: Any?
     nonisolated(unsafe) private var endOfItemObserver: NSObjectProtocol?
     nonisolated(unsafe) private var activeSecurityScopedURL: URL?
@@ -46,8 +51,10 @@ public final class PlaybackManager: ObservableObject {
     private var isPreparingItem = false
     private var pendingSeekCount = 0
     private var hasPlayedToEnd = false
+    private var lastCheckpointDate = Date.distantPast
 
-    init() {
+    init(progressStore: PlaybackProgressStore) {
+        self.progressStore = progressStore
         player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
         setupAudioSession()
         setupNowPlayingCommands()
@@ -79,6 +86,11 @@ public final class PlaybackManager: ObservableObject {
         return false
     }
 
+    /// Whether `item` is the media currently loaded in the player, so it can be shown again without reloading.
+    public func isLoaded(_ item: MediaItem) -> Bool {
+        return currentMediaItem?.id == item.id && player.currentItem != nil && !isFailed
+    }
+
     public func loadMedia(item: MediaItem, autoPlay: Bool = true) {
         persistCurrentProgress()
         stopAccessingActiveSecurityScopedResource()
@@ -98,14 +110,9 @@ public final class PlaybackManager: ObservableObject {
         timeline = .finite(duration: item.duration)
         bufferedTime = 0
 
-        let targetURL: URL
-        if !item.isRemote, let resolved = item.resolveSecurityScopedURL() {
-            targetURL = resolved
-            if resolved.startAccessingSecurityScopedResource() {
-                activeSecurityScopedURL = resolved
-            }
-        } else {
-            targetURL = item.url
+        guard let targetURL = playableURL(for: item) else {
+            failLoad("This file is no longer available. Import it again from the Files app.")
+            return
         }
 
         let playerItem = AVPlayerItem(asset: AVURLAsset(url: targetURL))
@@ -230,10 +237,49 @@ public final class PlaybackManager: ObservableObject {
         AVAudioSessionManager.shared.deactivateAudioSession()
     }
 
+    /// Saves the current position, including zero after a restart. Nothing is saved while the item is
+    /// still loading (the position is only a resume target then), after a failure, or for live streams,
+    /// where a position is a point in a moving window rather than progress through the item.
     public func persistCurrentProgress() {
-        // A live position is a point in a moving window, not progress through the item.
-        guard let item = currentMediaItem, !isLive, currentTime > 0 else { return }
-        PlaybackProgressStore.shared.updateProgress(for: item.id, position: currentTime, duration: duration)
+        guard let item = currentMediaItem, !isPreparingItem, !isFailed, !isLive else { return }
+        let position = hasPlayedToEnd && duration > 0 ? duration : currentTime
+        progressStore.updateProgress(for: item.id, position: position, duration: duration)
+        lastCheckpointDate = Date()
+    }
+
+    // MARK: - Loading
+
+    /// The URL to hand to AVFoundation. Imported files are resolved through their bookmark; a stale
+    /// bookmark is refreshed, and one that can no longer be resolved returns `nil`.
+    private func playableURL(for item: MediaItem) -> URL? {
+        guard !item.isRemote else { return item.url }
+
+        guard item.bookmarkData != nil else {
+            // Files opened in place without a bookmark are only reachable through their original URL.
+            if item.url.startAccessingSecurityScopedResource() {
+                activeSecurityScopedURL = item.url
+            }
+            return item.url
+        }
+
+        guard let resolved = item.resolveBookmark() else { return nil }
+        if resolved.url.startAccessingSecurityScopedResource() {
+            activeSecurityScopedURL = resolved.url
+        }
+        if resolved.isStale, let refreshed = progressStore.createSecurityScopedBookmark(for: resolved.url) {
+            progressStore.updateBookmark(refreshed, for: item.id)
+        }
+        return resolved.url
+    }
+
+    private func failLoad(_ message: String) {
+        invalidateItemObservations()
+        player.replaceCurrentItem(with: nil)
+        removePeriodicTimeObserver()
+        isPreparingItem = false
+        wantsToPlay = false
+        playbackState = .failed(message)
+        NowPlayingManager.shared.clearNowPlaying()
     }
 
     // MARK: - Player item lifecycle
@@ -414,6 +460,11 @@ public final class PlaybackManager: ObservableObject {
         if seconds.isFinite && seconds != currentTime {
             currentTime = seconds
         }
+
+        if player.timeControlStatus == .playing,
+           Date().timeIntervalSince(lastCheckpointDate) >= Self.checkpointInterval {
+            persistCurrentProgress()
+        }
     }
 
     private func removePeriodicTimeObserver() {
@@ -520,7 +571,7 @@ public final class PlaybackManager: ObservableObject {
             currentTime = duration
         }
         if let mediaItem = currentMediaItem {
-            PlaybackProgressStore.shared.markCompleted(id: mediaItem.id)
+            progressStore.markCompleted(id: mediaItem.id)
         }
         updateNowPlayingPlaybackState()
     }

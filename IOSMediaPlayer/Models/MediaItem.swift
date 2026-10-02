@@ -79,22 +79,28 @@ public struct MediaItem: Identifiable, Codable, Equatable, Hashable {
         }
     }
 
-    public func resolveSecurityScopedURL() -> URL? {
-        guard let data = bookmarkData else {
-            return url
-        }
+    /// True when the URL carries a user name or password (`https://user:pass@host/...`).
+    public var hasEmbeddedCredentials: Bool {
+        return url.user != nil || url.password != nil
+    }
+
+    /// Resolves the security-scoped bookmark for an imported file.
+    ///
+    /// Returns `nil` when the bookmark can no longer be resolved (the file was deleted, or its
+    /// provider is unavailable). `isStale` means the file moved or was renamed and the bookmark
+    /// should be recreated from the returned URL.
+    public func resolveBookmark() -> (url: URL, isStale: Bool)? {
+        guard let data = bookmarkData else { return nil }
 
         var isStale = false
-        do {
-            let resolved = try URL(
-                resolvingBookmarkData: data,
-                options: [.withoutUI],
-                relativeTo: nil,
-                bookmarkDataIsStale: &isStale
-            )
-            return resolved
-        } catch {
-            return url
+        guard let resolved = try? URL(
+            resolvingBookmarkData: data,
+            options: [.withoutUI],
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        ) else {
+            return nil
         }
+        return (resolved, isStale)
     }
 }

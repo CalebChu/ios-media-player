@@ -2,8 +2,9 @@ import SwiftUI
 
 @main
 struct IOSMediaPlayerApp: App {
-    @StateObject private var playbackManager = PlaybackManager.shared
-    @StateObject private var progressStore = PlaybackProgressStore.shared
+    // Both are app-lifetime singletons, so they are injected rather than owned with @StateObject.
+    private let playbackManager = PlaybackManager.shared
+    private let progressStore = PlaybackProgressStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
     init() {

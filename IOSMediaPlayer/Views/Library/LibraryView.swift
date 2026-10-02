@@ -2,8 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 public struct LibraryView: View {
-    @ObservedObject var progressStore = PlaybackProgressStore.shared
-    @ObservedObject var playbackManager = PlaybackManager.shared
+    @EnvironmentObject private var progressStore: PlaybackProgressStore
+    @EnvironmentObject private var playbackManager: PlaybackManager
 
     @State private var isShowingFileImporter = false
     @State private var isShowingStreamSheet = false
@@ -349,8 +349,18 @@ public struct LibraryView: View {
     }
 
     private func startPlayback(for item: MediaItem) {
+        // Checkpoint whatever is playing first, so the saved entry reflects its latest position.
+        playbackManager.persistCurrentProgress()
         let savedItem = progressStore.saveItem(item)
-        playbackManager.loadMedia(item: savedItem)
+
+        if playbackManager.isLoaded(savedItem) {
+            // Already in the player: show it again instead of reloading, which would rewind it.
+            if !playbackManager.isPlaying {
+                playbackManager.play()
+            }
+        } else {
+            playbackManager.loadMedia(item: savedItem)
+        }
         isPlayerPresented = true
     }
 }
