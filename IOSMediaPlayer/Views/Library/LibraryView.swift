@@ -302,10 +302,10 @@ public struct LibraryView: View {
                     bookmarkData: bookmark,
                     mediaType: isAudio ? .audio : .video
                 )
-                progressStore.saveItem(item)
+                let savedItem = progressStore.saveItem(item)
 
                 if urls.count == 1 {
-                    startPlayback(for: item)
+                    startPlayback(for: savedItem)
                 }
             }
 
@@ -315,8 +315,8 @@ public struct LibraryView: View {
     }
 
     private func startPlayback(for item: MediaItem) {
-        progressStore.saveItem(item)
-        playbackManager.loadMedia(item: item)
+        let savedItem = progressStore.saveItem(item)
+        playbackManager.loadMedia(item: savedItem)
         isPlayerPresented = true
     }
 }

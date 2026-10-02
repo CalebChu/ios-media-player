@@ -40,13 +40,32 @@ public final class PlaybackProgressStore: ObservableObject {
         }
     }
 
-    public func saveItem(_ item: MediaItem) {
+    @discardableResult
+    public func saveItem(_ item: MediaItem) -> MediaItem {
         if let index = items.firstIndex(where: { $0.id == item.id || $0.url == item.url }) {
-            items[index] = item
+            var existing = items[index]
+            let resolvedPosition = item.lastPosition > 0 ? item.lastPosition : existing.lastPosition
+            let resolvedDuration = item.duration > 0 ? item.duration : existing.duration
+            let resolvedCompleted = item.lastPosition > 0 ? item.isCompleted : (existing.isCompleted || item.isCompleted)
+
+            existing.title = item.title.isEmpty ? existing.title : item.title
+            if let artist = item.artist { existing.artist = artist }
+            if let bookmarkData = item.bookmarkData { existing.bookmarkData = bookmarkData }
+            existing.isRemote = item.isRemote
+            existing.mediaType = item.mediaType
+            existing.lastPosition = resolvedPosition
+            existing.duration = resolvedDuration
+            existing.isCompleted = resolvedCompleted
+            existing.lastPlayedDate = max(existing.lastPlayedDate, item.lastPlayedDate)
+
+            items[index] = existing
+            persist()
+            return existing
         } else {
             items.insert(item, at: 0)
+            persist()
+            return item
         }
-        persist()
     }
 
     public func deleteItem(withId id: UUID) {

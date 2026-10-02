@@ -75,4 +75,32 @@ final class PlaybackProgressStoreTests: XCTestCase {
         store.deleteItem(withId: item.id)
         XCTAssertEqual(store.items.count, 0)
     }
+
+    func testReaddingExistingItemPreservesProgressAndReturnsMergedItem() {
+        let initialItem = MediaItem(
+            title: "Movie",
+            url: URL(string: "https://example.com/movie.mp4")!,
+            isRemote: true,
+            duration: 1000
+        )
+        store.saveItem(initialItem)
+        store.updateProgress(for: initialItem.id, position: 450, duration: 1000)
+
+        // Create a new instance representing re-importing or tapping sample stream again
+        let readdedItem = MediaItem(
+            title: "Movie Updated Title",
+            url: URL(string: "https://example.com/movie.mp4")!,
+            isRemote: true,
+            duration: 0,
+            lastPosition: 0
+        )
+
+        let mergedItem = store.saveItem(readdedItem)
+
+        XCTAssertEqual(store.items.count, 1)
+        XCTAssertEqual(mergedItem.id, initialItem.id)
+        XCTAssertEqual(mergedItem.lastPosition, 450)
+        XCTAssertEqual(mergedItem.duration, 1000)
+        XCTAssertEqual(store.items.first?.lastPosition, 450)
+    }
 }
