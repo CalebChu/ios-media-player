@@ -145,6 +145,7 @@ public final class PlaybackManager: ObservableObject {
 
     public func setPlaybackSpeed(_ speed: PlaybackSpeed) {
         playbackSpeed = speed
+        player.defaultRate = speed.rate
         if isPlaying {
             player.rate = speed.rate
         }
