@@ -24,7 +24,6 @@ public final class AVAudioSessionManager {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playback, mode: .moviePlayback, options: [])
-            try audioSession.setActive(true)
             isConfigured = true
         } catch {
             print("Failed to configure AVAudioSession: \(error.localizedDescription)")

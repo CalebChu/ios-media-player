@@ -187,6 +187,7 @@ public final class PlaybackManager: ObservableObject {
         duration = 0
         bufferedTime = 0
         NowPlayingManager.shared.clearNowPlaying()
+        AVAudioSessionManager.shared.deactivateAudioSession()
     }
 
     public func persistCurrentProgress() {
